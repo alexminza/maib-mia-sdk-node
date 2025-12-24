@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 const { API_ENDPOINTS, DEFAULT_TIMEOUT, REQUIRED_QR_PARAMS, REQUIRED_QR_HYBRID_PARAMS, REQUIRED_RTP_PARAMS } = require('./constants');
-const { createError, replacePath } = require('./utils');
+const { createError } = require('./utils');
 
 class MaibMiaApiRequest {
     /**
@@ -18,7 +18,7 @@ class MaibMiaApiRequest {
         this.timeout = timeout;
         this.client = axios.create({
             baseURL: baseUrl,
-            timeout: timeout,
+            timeout: timeout
         });
     }
 
@@ -59,7 +59,7 @@ class MaibMiaApiRequest {
      */
     async _sendRequest(method, url, data=null, params=null, token=null, entity_id=null) {
         if (!entity_id)
-            url = replacePath(url, { entity_id });
+            url = this._buildEndpoint(url, { entity_id });
 
         const requestConfig = {
             url: url,
@@ -74,13 +74,29 @@ class MaibMiaApiRequest {
     }
 
     /**
+     * Replace path parameters in URL
+     * @param {string} path - URL path with parameters
+     * @param {Object} params - Parameters to replace
+     * @returns {string} - Path with replaced parameters
+     */
+    _buildEndpoint(path, params) {
+        let result = path;
+
+        for (const [key, value] of Object.entries(params)) {
+            result = result.replace(`:${key}`, value);
+        }
+
+        return result;
+    }
+
+    /**
      * Set authorization header
      * @param {string} token - Access token
      * @returns {Object} - Headers object
      */
     _getAuthHeaders(token) {
         if (!token) {
-            throw createError('Access token is required');
+            throw new Error('Access token is required');
         }
 
         return {
@@ -152,7 +168,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code/create-extension-for-qr-code-by-id
      */
     async qrCreateExtension(qrId, data, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_QR_EXTENSION, { qrId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_EXTENSION, { qrId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -164,7 +180,7 @@ class MaibMiaApiRequest {
      * @lik https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-qr-details-by-id
      */
     async qrDetails(qrId, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_QR_ID, { qrId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_ID, { qrId });
         return this._executeOperation(endpoint, token, null, null, 'GET');
     }
 
@@ -177,7 +193,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-cancellation/cancel-active-qr-static-dynamic
      */
     async qrCancel(qrId, data, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_QR_CANCEL, { qrId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_CANCEL, { qrId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -190,7 +206,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-cancellation/cancel-active-qr-extension-hybrid
      */
     async qrCancelExtension(qrId, data, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_QR_EXTENSION_CANCEL, { qrId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_EXTENSION_CANCEL, { qrId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -226,7 +242,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-payment-details-by-id
      */
     async paymentDetails(payId, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_PAYMENTS_ID, { payId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_PAYMENTS_ID, { payId });
         return this._executeOperation(endpoint, token, null, null, 'GET');
     }
 
@@ -239,7 +255,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-refund/refund-completed-payment
      */
     async paymentRefund(payId, data, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_PAYMENTS_REFUND, { payId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_PAYMENTS_REFUND, { payId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -274,7 +290,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/retrieve-the-status-of-a-payment-request
      */
     async rtpStatus(rtpId, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_RTP_ID, { rtpId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_ID, { rtpId });
         return this._executeOperation(endpoint, token, null, null, 'GET');
     }
 
@@ -287,7 +303,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/cancel-a-pending-payment-request
      */
     async rtpCancel(rtpId, data, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_RTP_CANCEL, { rtpId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_CANCEL, { rtpId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -311,7 +327,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/initiate-a-refund-for-a-completed-payment
      */
     async rtpRefund(payId, data, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_RTP_REFUND, { payId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_REFUND, { payId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -324,7 +340,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-acceptance-of-a-payment-request
      */
     async rtpTestAccept(rtpId, data, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_RTP_TEST_ACCEPT, { rtpId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_TEST_ACCEPT, { rtpId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -336,7 +352,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-rejection-of-a-payment-request
      */
     async rtpTestReject(rtpId, token) {
-        const endpoint = replacePath(API_ENDPOINTS.MIA_RTP_TEST_REJECT, { rtpId });
+        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_TEST_REJECT, { rtpId });
         return this._executeOperation(endpoint, token);
     }
     //#endregion

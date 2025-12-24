@@ -6,24 +6,6 @@
 
 
 /**
- * Replace path parameters in URL
- * @param {string} path - URL path with parameters
- * @param {Object} params - Parameters to replace
- * @returns {string} - Path with replaced parameters
- */
-function replacePath(path, params) {
-    let result = path;
-
-    for (const [key, value] of Object.entries(params)) {
-        result = result.replace(`:${key}`, value);
-    }
-
-    return result;
-}
-
-
-
-/**
  * Format date to ISO 8601 string
  * @param {Date|string} date - Date to format
  * @returns {string} - ISO formatted date string
@@ -53,7 +35,6 @@ function createError(message, details = {}) {
 }
 
 module.exports = {
-    replacePath,
     formatDate,
     createError
 };
