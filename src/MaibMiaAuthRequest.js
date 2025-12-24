@@ -18,11 +18,7 @@ class MaibMiaAuthRequest {
         this.timeout = timeout;
         this.client = axios.create({
             baseURL: baseUrl,
-            timeout: timeout,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
+            timeout: timeout
         });
     }
 
@@ -37,54 +33,24 @@ class MaibMiaAuthRequest {
     }
 
     /**
-     * Generate access token using client credentials
+     * Obtain Authentication Token
      * @param {string} clientId - Client ID
      * @param {string} clientSecret - Client secret
      * @returns {Promise<Object>} - Token response object
+     * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/authentication/obtain-authentication-token
      */
     async generateToken(clientId, clientSecret) {
         if (!clientId || !clientSecret) {
-            throw createError('Client ID and Client Secret are required');
+            throw new Error('Client ID and Client Secret are required');
         }
 
-        try {
-            const requestBody = {
-                clientId: clientId,
-                clientSecret: clientSecret
-            };
+        const tokenData = { clientId, clientSecret };
+        const tokenResponse = await this.client.post(
+            API_ENDPOINTS.AUTH_TOKEN,
+            tokenData
+        );
 
-            const response = await this.client.post(
-                API_ENDPOINTS.AUTH_TOKEN,
-                requestBody
-            );
-
-            if (response.data && response.data.result) {
-                return response.data.result;
-            }
-
-            if (response.data && response.data.accessToken) {
-                return response.data;
-            }
-
-            throw createError('Invalid token response format', {
-                response: response.data
-            });
-
-        } catch (error) {
-            if (error.response) {
-                throw createError(
-                    `Authentication failed: ${error.response.data?.message || error.message}`,
-                    {
-                        status: error.response.status,
-                        data: error.response.data
-                    }
-                );
-            }
-
-            throw createError(`Authentication request failed: ${error.message}`, {
-                originalError: error
-            });
-        }
+        return tokenResponse.data.result;
     }
 }
 
