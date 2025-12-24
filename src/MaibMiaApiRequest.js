@@ -138,7 +138,7 @@ class MaibMiaApiRequest {
      */
     async qrCreateExtension(qrId, data, token) {
         const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_QR_EXTENSION, { qrId });
-        return this._executeOperation(endpoint, token, data);
+        return this._executeOperation(endpoint, token, data, REQUIRED_PARAMS.QR_EXTENSION_PARAMS);
     }
 
     /**
@@ -310,7 +310,7 @@ class MaibMiaApiRequest {
      */
     async rtpTestAccept(rtpId, data, token) {
         const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_RTP_TEST_ACCEPT, { rtpId });
-        return this._executeOperation(endpoint, token, data);
+        return this._executeOperation(endpoint, token, data, REQUIRED_PARAMS.TEST_ACCEPT_PARAMS);
     }
 
     /**
