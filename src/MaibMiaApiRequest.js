@@ -54,13 +54,9 @@ class MaibMiaApiRequest {
      * @param {Object} data - Request data
      * @param {Object} params - Request params
      * @param {string} token - Access token
-     * @param {string} entity_id - Entity ID
      * @returns {Promise<Object>} API request response
      */
-    async _sendRequest(method, url, data=null, params=null, token=null, entity_id=null) {
-        if (!entity_id)
-            url = this._buildEndpoint(url, { entity_id });
-
+    async _sendRequest(method, url, data=null, params=null, token=null) {
         const requestConfig = {
             url: url,
             method: method,
@@ -83,6 +79,7 @@ class MaibMiaApiRequest {
         let result = path;
 
         for (const [key, value] of Object.entries(params)) {
+            this._validateIdParam(value);
             result = result.replace(`:${key}`, value);
         }
 
