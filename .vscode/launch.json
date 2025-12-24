@@ -8,7 +8,8 @@
             "type": "node",
             "name": "Run Current File",
             "request": "launch",
-            "program": "${file}"
+            "program": "${file}",
+            "cwd": "${fileDirname}",
         }
     ]
 }

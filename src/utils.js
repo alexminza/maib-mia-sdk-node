@@ -67,7 +67,6 @@ function createError(message, details = {}) {
 }
 
 module.exports = {
-    validateCallbackSignature,
     replacePath,
     validateRequiredFields,
     formatDate,
