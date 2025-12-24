@@ -3,8 +3,9 @@
  * Main Class
  */
 
+const crypto = require('crypto');
+
 const { SANDBOX_BASE_URL, PRODUCTION_BASE_URL } = require('./constants');
-const { validateCallbackSignature } = require('./utils');
 
 class MaibMiaSdk {
     /**
@@ -22,31 +23,59 @@ class MaibMiaSdk {
     }
 
     /**
-     * Validate callback signature from maib MIA
-     * @param {Object} callbackData - The callback data received from maib
+     * Validate callback data signature
+     * @param {Object} callbackData - The callback data received from the payment gateway
      * @param {string} signatureKey - The signature key for validation
      * @returns {boolean} - True if signature is valid, false otherwise
+     * @link https://docs.maibmerchants.md/mia-qr-api/en/notifications-on-callback-url
+     * @link https://docs.maibmerchants.md/mia-qr-api/en/examples/signature-key-verification
+     * @link https://docs.maibmerchants.md/request-to-pay/api-reference/callback-notifications#signature-validation
+     * @link https://docs.maibmerchants.md/request-to-pay/api-reference/examples/signature-key-verification
      */
     static validateCallbackSignature(callbackData, signatureKey) {
-        return validateCallbackSignature(callbackData, signatureKey);
-    }
+        if (!signatureKey) {
+            throw new Error('Invalid signature key');
+        }
 
-    /**
-     * Check if running in sandbox mode
-     * @param {string} baseUrl - Base URL being used
-     * @returns {boolean} - True if sandbox mode
-     */
-    static isSandbox(baseUrl) {
-        return baseUrl === SANDBOX_BASE_URL;
-    }
+        const callbackSignature = callbackData.signature || '';
+        const callbackResult = callbackData.result || {};
 
-    /**
-     * Check if running in production mode
-     * @param {string} baseUrl - Base URL being used
-     * @returns {boolean} - True if production mode
-     */
-    static isProduction(baseUrl) {
-        return baseUrl === PRODUCTION_BASE_URL;
+        if (!callbackSignature || !callbackResult) {
+            throw new Error('Missing result or signature in callback data.');
+        }
+
+        const keys = {};
+
+        // Collect and format values
+        for (const [key, value] of Object.entries(callbackResult)) {
+            if (value === null || value === undefined) continue;
+
+            let valueStr;
+            if (key === 'amount' || key === 'commission') {
+                valueStr = parseFloat(value).toFixed(2); // Always two decimals
+            } else {
+                valueStr = String(value);
+            }
+
+            if (valueStr.trim() !== '') {
+                keys[key] = valueStr;
+            }
+        }
+
+        // Sort keys case-insensitively
+        const orderedKeys = Object.keys(keys).sort((a, b) =>
+            a.toLowerCase().localeCompare(b.toLowerCase())
+        );
+
+        // Join values with colon
+        const additionalString = orderedKeys.map(k => keys[k]).join(':');
+        const hashInput = `${additionalString}:${signatureKey}`;
+
+        // Hash and base64 encode
+        const hash = crypto.createHash('sha256').update(hashInput, 'utf8').digest('base64');
+
+        // Compare with expected signature
+        return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(callbackSignature));
     }
 }
 
