@@ -19,10 +19,6 @@ class MaibMiaApiRequest {
         this.client = axios.create({
             baseURL: baseUrl,
             timeout: timeout,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
         });
     }
 
@@ -63,7 +59,7 @@ class MaibMiaApiRequest {
 
         try {
             const response = await this.client.post(
-                API_ENDPOINTS.QR_CREATE,
+                API_ENDPOINTS.MIA_QR,
                 data,
                 { headers: this._getAuthHeaders(token) }
             );
@@ -86,7 +82,7 @@ class MaibMiaApiRequest {
         }
 
         try {
-            const url = replacePath(API_ENDPOINTS.QR_DETAILS, { qrId });
+            const url = replacePath(API_ENDPOINTS.MIA_QR_ID, { qrId });
             const response = await this.client.get(
                 url,
                 { headers: this._getAuthHeaders(token) }
@@ -205,7 +201,7 @@ class MaibMiaApiRequest {
         }
 
         try {
-            const url = replacePath(API_ENDPOINTS.PAYMENT_DETAILS, { payId });
+            const url = replacePath(API_ENDPOINTS.MIA_PAYMENTS_ID, { payId });
             const response = await this.client.get(
                 url,
                 { headers: this._getAuthHeaders(token) }
@@ -230,7 +226,7 @@ class MaibMiaApiRequest {
         }
 
         try {
-            const url = replacePath(API_ENDPOINTS.PAYMENT_REFUND, { payId });
+            const url = replacePath(API_ENDPOINTS.MIA_PAYMENTS_REFUND, { payId });
             const response = await this.client.post(
                 url,
                 data,
@@ -255,7 +251,7 @@ class MaibMiaApiRequest {
 
         try {
             const response = await this.client.post(
-                API_ENDPOINTS.TEST_PAY,
+                API_ENDPOINTS.MIA_TEST_PAY,
                 data,
                 { headers: this._getAuthHeaders(token) }
             );

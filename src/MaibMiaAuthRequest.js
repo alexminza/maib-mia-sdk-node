@@ -49,8 +49,8 @@ class MaibMiaAuthRequest {
 
         try {
             const requestBody = {
-                client_id: clientId,
-                client_secret: clientSecret
+                clientId: clientId,
+                clientSecret: clientSecret
             };
 
             const response = await this.client.post(
