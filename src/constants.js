@@ -9,6 +9,8 @@
 const DEFAULT_BASE_URL = 'https://api.maibmerchants.md/v2/';
 const SANDBOX_BASE_URL = 'https://sandbox.maibmerchants.md/v2/';
 
+const DEFAULT_TIMEOUT = 30000; // milliseconds
+
 const API_ENDPOINTS = {
     AUTH_TOKEN: 'auth/token',
 
@@ -35,24 +37,25 @@ const API_ENDPOINTS = {
     MIA_RTP_TEST_REJECT: 'rtp/:rtpId/test-reject'
 };
 
-// https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-qr-code-static-dynamic#request-parameters-body
-const REQUIRED_QR_PARAMS = ['type', 'amountType', 'currency', 'description'];
-// https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code#request-body-parameters
-const REQUIRED_QR_HYBRID_PARAMS = ['amountType', 'currency'];
-// https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code/create-extension-for-qr-code-by-id#request-parameters-body
-const REQUIRED_QR_EXTENSION_PARAMS = ['expiresAt', 'description'];
-// https://docs.maibmerchants.md/mia-qr-api/en/payment-simulation-sandbox#request-parameters-body-json
-const REQUIRED_TEST_PAY_PARAMS = ['qrId', 'amount', 'iban', 'currency', 'payerName'];
-// https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/create-a-new-payment-request-rtp#request-body-parameters
-const REQUIRED_RTP_PARAMS = ['alias', 'amount', 'currency', 'expiresAt', 'description'];
-// https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-acceptance-of-a-payment-request#request-body-parameters
-const REQUIRED_TEST_ACCEPT_PARAMS = ['amount', 'currency'];
-
-const DEFAULT_TIMEOUT = 30000; // milliseconds
+const REQUIRED_PARAMS = {
+    // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-qr-code-static-dynamic#request-parameters-body
+    QR_PARAMS: ['type', 'amountType', 'currency', 'description'],
+    // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code#request-body-parameters
+    QR_HYBRID_PARAMS: ['amountType', 'currency'],
+    // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code/create-extension-for-qr-code-by-id#request-parameters-body
+    QR_EXTENSION_PARAMS: ['expiresAt', 'description'],
+    // https://docs.maibmerchants.md/mia-qr-api/en/payment-simulation-sandbox#request-parameters-body-json
+    TEST_PAY_PARAMS: ['qrId', 'amount', 'iban', 'currency', 'payerName'],
+    // https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/create-a-new-payment-request-rtp#request-body-parameters
+    RTP_PARAMS: ['alias', 'amount', 'currency', 'expiresAt', 'description'],
+    // https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-acceptance-of-a-payment-request#request-body-parameters
+    TEST_ACCEPT_PARAMS: ['amount', 'currency']
+}
 
 module.exports = {
-    SANDBOX_BASE_URL,
     DEFAULT_BASE_URL,
+    SANDBOX_BASE_URL,
+    DEFAULT_TIMEOUT,
     API_ENDPOINTS,
-    DEFAULT_TIMEOUT
+    REQUIRED_PARAMS
 };

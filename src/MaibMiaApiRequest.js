@@ -3,7 +3,7 @@
  * API Request Handler
  */
 
-const { API_ENDPOINTS, REQUIRED_QR_PARAMS, REQUIRED_QR_HYBRID_PARAMS, REQUIRED_RTP_PARAMS } = require('./constants');
+const { API_ENDPOINTS, REQUIRED_PARAMS } = require('./constants');
 
 const MaibMiaSdk = require('./MaibMiaSdk');
 
@@ -113,7 +113,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-qr-code-static-dynamic
      */
     async qrCreate(data, token) {
-        return this._executeOperation(API_ENDPOINTS.MIA_QR, token, data, REQUIRED_QR_PARAMS);
+        return this._executeOperation(API_ENDPOINTS.MIA_QR, token, data, REQUIRED_PARAMS.QR_PARAMS);
     }
 
     /**
@@ -125,7 +125,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code
      */
     async qrCreateHybrid(data, token) {
-        return this._executeOperation(API_ENDPOINTS.MIA_QR_HYBRID, token, data, REQUIRED_QR_HYBRID_PARAMS);
+        return this._executeOperation(API_ENDPOINTS.MIA_QR_HYBRID, token, data, REQUIRED_PARAMS.QR_HYBRID_PARAMS);
     }
 
     /**
@@ -200,7 +200,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/payment-simulation-sandbox
      */
     async testPay(data, token) {
-        return this._executeOperation(API_ENDPOINTS.MIA_TEST_PAY, token, data);
+        return this._executeOperation(API_ENDPOINTS.MIA_TEST_PAY, token, data, REQUIRED_PARAMS.TEST_PAY_PARAMS);
     }
 
     /**
@@ -248,7 +248,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/create-a-new-payment-request-rtp
      */
     async rtpCreate(data, token) {
-        return this._executeOperation(API_ENDPOINTS.MIA_RTP, token, data, REQUIRED_RTP_PARAMS);
+        return this._executeOperation(API_ENDPOINTS.MIA_RTP, token, data, REQUIRED_PARAMS.RTP_PARAMS);
     }
 
     /**
