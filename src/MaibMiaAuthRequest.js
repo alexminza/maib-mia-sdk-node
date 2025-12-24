@@ -3,32 +3,27 @@
  * Authentication Request Handler
  */
 
-const axios = require('axios');
-const { API_ENDPOINTS, DEFAULT_TIMEOUT } = require('./constants');
-const { handleResponse } = require('./utils');
+const { API_ENDPOINTS } = require('./constants');
+
+const MaibMiaSdk = require('./MaibMiaSdk');
 
 class MaibMiaAuthRequest {
     /**
      * Create a new MaibMiaAuthRequest instance
-     * @param {string} baseUrl - Base URL for the API
-     * @param {number} timeout - Request timeout in milliseconds
+     * @param {string} baseUrl - maib MIA API base url
+     * @param {number} timeout - API request timeout in milliseconds
      */
-    constructor(baseUrl, timeout = DEFAULT_TIMEOUT) {
-        this.baseUrl = baseUrl;
-        this.timeout = timeout;
-        this.client = axios.create({
-            baseURL: baseUrl,
-            timeout: timeout
-        });
+    constructor(baseUrl = MaibMiaSdk.DEFAULT_BASE_URL, timeout = MaibMiaSdk.DEFAULT_TIMEOUT) {
+        this.client = new MaibMiaSdk(baseUrl, timeout);
     }
 
     /**
      * Static factory method to create an instance
-     * @param {string} baseUrl - Base URL for the API
-     * @param {number} timeout - Request timeout in milliseconds
+     * @param {string} baseUrl - maib MIA API base url
+     * @param {number} timeout - API request timeout in milliseconds
      * @returns {MaibMiaAuthRequest}
      */
-    static create(baseUrl, timeout = DEFAULT_TIMEOUT) {
+    static create(baseUrl = MaibMiaSdk.DEFAULT_BASE_URL, timeout = MaibMiaSdk.DEFAULT_TIMEOUT) {
         return new MaibMiaAuthRequest(baseUrl, timeout);
     }
 
@@ -45,12 +40,7 @@ class MaibMiaAuthRequest {
         }
 
         const tokenData = { clientId, clientSecret };
-        const tokenResponse = await this.client.post(
-            API_ENDPOINTS.AUTH_TOKEN,
-            tokenData
-        );
-
-        return handleResponse(tokenResponse);
+        return this.client._sendRequest('POST', API_ENDPOINTS.AUTH_TOKEN, tokenData);
     }
 }
 

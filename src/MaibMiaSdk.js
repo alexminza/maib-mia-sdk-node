@@ -4,10 +4,26 @@
  */
 
 const crypto = require('crypto');
+const axios = require('axios');
 
-const { SANDBOX_BASE_URL, DEFAULT_BASE_URL } = require('./constants');
+const { SANDBOX_BASE_URL, DEFAULT_BASE_URL, DEFAULT_TIMEOUT } = require('./constants');
 
 class MaibMiaSdk {
+    /**
+     * Create a new MaibMiaSdk instance
+     * @param {string} baseUrl - maib MIA API base url
+     * @param {number} timeout - API request timeout in milliseconds
+     */
+    constructor(baseUrl = DEFAULT_BASE_URL, timeout = DEFAULT_TIMEOUT) {
+        this.baseUrl = baseUrl;
+        this.timeout = timeout;
+
+        this.client = axios.create({
+            baseURL: baseUrl,
+            timeout: timeout
+        });
+    }
+
     /**
      * Sandbox base URL
      */
@@ -20,6 +36,72 @@ class MaibMiaSdk {
      */
     static get DEFAULT_BASE_URL() {
         return DEFAULT_BASE_URL;
+    }
+
+    /**
+     * Default API request timeout in milliseconds
+     */
+    static get DEFAULT_TIMEOUT() {
+        return DEFAULT_TIMEOUT;
+    }
+
+    /**
+     * Perform API request
+     * @param {string} method - Request HTTP method
+     * @param {string} url - Request URL
+     * @param {Object} data - Request data
+     * @param {Object} params - Request params
+     * @param {string} token - Access token
+     * @returns {Promise<Object>} API request response
+     */
+    async _sendRequest(method, url, data=null, params=null, token=null) {
+        const requestConfig = {
+            url: url,
+            method: method,
+            data: data,
+            headers: MaibMiaSdk._getAuthHeaders(token),
+            params: params
+        }
+
+        const response = await this.client.request(requestConfig);
+        return MaibMiaSdk._handleResponse(response);
+    }
+
+    /**
+     * Set authorization header
+     * @param {string} token - Access token
+     * @returns {Object} - Headers object
+     */
+    static _getAuthHeaders(token) {
+        if (!token) return null;
+
+        return {
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
+    /**
+     * Handles errors returned by the API
+     * @param {axios.AxiosResponse} response - Response object
+     * @param {string} endpoint - API endpoint
+     */
+    static _handleResponse(response, endpoint) {
+        if (!response.data)
+            throw new Error(`Invalid response received from server for endpoint ${endpoint}`);
+
+        if (response.data.ok) {
+            if (response.data.result)
+                return response.data.result;
+
+            throw new Error(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field.`);
+        }
+
+        if(response.errors) {
+            const error = response.errors[0];
+            throw new Error(`Error sending request to endpoint ${endpoint}: ${error.errorMessage} (${error.errorCode})`);
+        }
+
+        throw new Error(`Invalid response received from server for endpoint ${endpoint}: missing 'ok' and 'errors' fields`);
     }
 
     /**

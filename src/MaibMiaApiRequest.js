@@ -3,32 +3,27 @@
  * API Request Handler
  */
 
-const axios = require('axios');
-const { API_ENDPOINTS, DEFAULT_TIMEOUT, REQUIRED_QR_PARAMS, REQUIRED_QR_HYBRID_PARAMS, REQUIRED_RTP_PARAMS } = require('./constants');
-const { handleResponse } = require('./utils');
+const { API_ENDPOINTS, REQUIRED_QR_PARAMS, REQUIRED_QR_HYBRID_PARAMS, REQUIRED_RTP_PARAMS } = require('./constants');
+
+const MaibMiaSdk = require('./MaibMiaSdk');
 
 class MaibMiaApiRequest {
     /**
      * Create a new MaibMiaApiRequest instance
-     * @param {string} baseUrl - Base URL for the API
-     * @param {number} timeout - Request timeout in milliseconds
+     * @param {string} baseUrl - maib MIA API base url
+     * @param {number} timeout - API request timeout in milliseconds
      */
-    constructor(baseUrl, timeout = DEFAULT_TIMEOUT) {
-        this.baseUrl = baseUrl;
-        this.timeout = timeout;
-        this.client = axios.create({
-            baseURL: baseUrl,
-            timeout: timeout
-        });
+    constructor(baseUrl = MaibMiaSdk.DEFAULT_BASE_URL, timeout = MaibMiaSdk.DEFAULT_TIMEOUT) {
+        this.client = new MaibMiaSdk(baseUrl, timeout);
     }
 
     /**
      * Static factory method to create an instance
-     * @param {string} baseUrl - Base URL for the API
-     * @param {number} timeout - Request timeout in milliseconds
+     * @param {string} baseUrl - maib MIA API base url
+     * @param {number} timeout - API request timeout in milliseconds
      * @returns {MaibMiaApiRequest}
      */
-    static create(baseUrl, timeout = DEFAULT_TIMEOUT) {
+    static create(baseUrl = MaibMiaSdk.DEFAULT_BASE_URL, timeout = MaibMiaSdk.DEFAULT_TIMEOUT) {
         return new MaibMiaApiRequest(baseUrl, timeout);
     }
 
@@ -43,30 +38,10 @@ class MaibMiaApiRequest {
      * @param {Object} params - Request params
      */
     async _executeOperation(endpoint, token, data=null, requiredParams=null, method='POST', params=null) {
-        this._validateParams(data, requiredParams);
-        return this._sendRequest(method, endpoint, data, params, token);
-    }
+        MaibMiaApiRequest._validateAccessToken(token);
+        MaibMiaApiRequest._validateParams(data, requiredParams);
 
-    /**
-     * Perform API request
-     * @param {string} method - Request HTTP method
-     * @param {string} url - Request URL
-     * @param {Object} data - Request data
-     * @param {Object} params - Request params
-     * @param {string} token - Access token
-     * @returns {Promise<Object>} API request response
-     */
-    async _sendRequest(method, url, data=null, params=null, token=null) {
-        const requestConfig = {
-            url: url,
-            method: method,
-            data: data,
-            headers: this._getAuthHeaders(token),
-            params: params
-        }
-
-        const response = await this.client.request(requestConfig);
-        return handleResponse(response);
+        return this.client._sendRequest(method, endpoint, data, params, token);
     }
 
     /**
@@ -75,11 +50,11 @@ class MaibMiaApiRequest {
      * @param {Object} params - Parameters to replace
      * @returns {string} - Path with replaced parameters
      */
-    _buildEndpoint(path, params) {
+    static _buildEndpoint(path, params) {
         let result = path;
 
         for (const [key, value] of Object.entries(params)) {
-            this._validateIdParam(value);
+            MaibMiaApiRequest._validateIdParam(value);
             result = result.replace(`:${key}`, value);
         }
 
@@ -87,27 +62,22 @@ class MaibMiaApiRequest {
     }
 
     /**
-     * Set authorization header
-     * @param {string} token - Access token
-     * @returns {Object} - Headers object
-     */
-    _getAuthHeaders(token) {
-        if (!token) {
-            throw new Error('Access token is required');
-        }
-
-        return {
-            'Authorization': `Bearer ${token}`
-        };
-    }
-
-    /**
      * Validates Entity ID
      * @param {string} entityId - Entity ID
      */
-    _validateIdParam(entityId) {
+    static _validateIdParam(entityId) {
         if (!entityId) {
             throw new Error('Invalid ID parameter. Should be string of 36 characters.');
+        }
+    }
+
+    /**
+     * Validates the access token
+     * @param {string} token - Access token
+     */
+    static _validateAccessToken(token) {
+        if (!token) {
+            throw new Error('Access token is required');
         }
     }
 
@@ -117,7 +87,7 @@ class MaibMiaApiRequest {
      * @param {string[]} requiredParams - Array of required field names
      * @throws {Error} - If any required field is missing
      */
-    _validateParams(data, requiredParams) {
+    static _validateParams(data, requiredParams) {
         if (!data || !requiredParams)
             return;
 
@@ -165,7 +135,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code/create-extension-for-qr-code-by-id
      */
     async qrCreateExtension(qrId, data, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_EXTENSION, { qrId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_QR_EXTENSION, { qrId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -177,7 +147,7 @@ class MaibMiaApiRequest {
      * @lik https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-qr-details-by-id
      */
     async qrDetails(qrId, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_ID, { qrId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_QR_ID, { qrId });
         return this._executeOperation(endpoint, token, null, null, 'GET');
     }
 
@@ -190,7 +160,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-cancellation/cancel-active-qr-static-dynamic
      */
     async qrCancel(qrId, data, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_CANCEL, { qrId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_QR_CANCEL, { qrId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -203,7 +173,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-cancellation/cancel-active-qr-extension-hybrid
      */
     async qrCancelExtension(qrId, data, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_QR_EXTENSION_CANCEL, { qrId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_QR_EXTENSION_CANCEL, { qrId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -239,7 +209,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-payment-details-by-id
      */
     async paymentDetails(payId, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_PAYMENTS_ID, { payId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_PAYMENTS_ID, { payId });
         return this._executeOperation(endpoint, token, null, null, 'GET');
     }
 
@@ -252,7 +222,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-refund/refund-completed-payment
      */
     async paymentRefund(payId, data, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_PAYMENTS_REFUND, { payId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_PAYMENTS_REFUND, { payId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -287,7 +257,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/retrieve-the-status-of-a-payment-request
      */
     async rtpStatus(rtpId, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_ID, { rtpId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_RTP_ID, { rtpId });
         return this._executeOperation(endpoint, token, null, null, 'GET');
     }
 
@@ -300,7 +270,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/cancel-a-pending-payment-request
      */
     async rtpCancel(rtpId, data, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_CANCEL, { rtpId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_RTP_CANCEL, { rtpId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -324,7 +294,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/initiate-a-refund-for-a-completed-payment
      */
     async rtpRefund(payId, data, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_REFUND, { payId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_RTP_REFUND, { payId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -337,7 +307,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-acceptance-of-a-payment-request
      */
     async rtpTestAccept(rtpId, data, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_TEST_ACCEPT, { rtpId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_RTP_TEST_ACCEPT, { rtpId });
         return this._executeOperation(endpoint, token, data);
     }
 
@@ -349,7 +319,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-rejection-of-a-payment-request
      */
     async rtpTestReject(rtpId, token) {
-        const endpoint = this._buildEndpoint(API_ENDPOINTS.MIA_RTP_TEST_REJECT, { rtpId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_RTP_TEST_REJECT, { rtpId });
         return this._executeOperation(endpoint, token);
     }
     //#endregion
