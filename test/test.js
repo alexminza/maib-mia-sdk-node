@@ -17,11 +17,13 @@ async function testPayment() {
         .generateToken(CLIENT_ID, CLIENT_SECRET);
 
     const maibMiaToken = maibMiaAuth.accessToken;
+    const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
 
     // Create a dynamic order payment QR
+    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     const maibMiaQrData = {
         'type': 'Dynamic',
-        'expiresAt': new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        'expiresAt': maibMiaExpiresAt,
         'amountType': 'Fixed',
         'amount': 50.00,
         'currency': 'MDL',
@@ -31,13 +33,70 @@ async function testPayment() {
         'redirectUrl': 'https://example.com/success'
     }
 
-    const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
-    const maibMiaCreateQrResponse = await maibMiaApiRequest.qrCreate(maibMiaQrData, maibMiaToken);
+    const maibMiaQrCreateResponse = await maibMiaApiRequest.qrCreate(maibMiaQrData, maibMiaToken);
+    console.debug(maibMiaQrCreateResponse);
+
+    // Create a hybrid QR
+    const maibMiaQrHybridData = {
+        'amountType': 'Fixed',
+        'currency': 'MDL',
+        'terminalId': 'P011111',
+        'extension': {
+            'expiresAt': maibMiaExpiresAt,
+            'amount': 50.00,
+            'description': 'Order #123',
+            'orderId': '123',
+            'callbackUrl': 'https://example.com/callback',
+            'redirectUrl': 'https://example.com/success'
+        }
+    }
+
+    const maibMiaQrCreateHybridResponse = await maibMiaApiRequest.qrCreateHybrid(maibMiaQrHybridData, maibMiaToken);
+    console.debug(maibMiaQrCreateHybridResponse);
+
+    // Create QR Extension
+    const maibMiaQrExtensionData = {
+        'expiresAt': maibMiaExpiresAt,
+        'amount': 100.00,
+        'description': 'Updated Order #456 description',
+        'orderId': '456',
+        'callbackUrl': 'https://example.com/callback',
+        'redirectUrl': 'https://example.com/success'
+    }
+
+    const qrHybridId = maibMiaQrCreateHybridResponse['qrId'];
+    // const maibMiaQrCreateExtensionResponse = await maibMiaApiRequest.qrCreateExtension(qrHybridId, maibMiaQrExtensionData, maibMiaToken);
+    // console.debug(maibMiaQrCreateExtensionResponse);
+
+    const maibMiaQrCancelData = {
+        'reason': 'Test cancel reason'
+    }
+
+    // Cancel Active QR Extension (Hybrid)
+    const maibMiaQrCancelExtensionResponse = await maibMiaApiRequest.qrCancelExtension(qrHybridId, maibMiaQrCancelData, maibMiaToken);
+    console.debug(maibMiaQrCancelExtensionResponse);
+
+    // Cancel Active QR (Static, Dynamic)
+    const maibMiaQrCancelResponse = await maibMiaApiRequest.qrCancel(qrHybridId, maibMiaQrCancelData, maibMiaToken);
+    console.debug(maibMiaQrCancelResponse);
 
     // Get QR details
-    const qrId = maibMiaCreateQrResponse['qrId'];
-    const qrDetails = await maibMiaApiRequest.qrDetails(qrId, maibMiaToken);
-    console.debug(qrDetails);
+    const qrId = maibMiaQrCreateResponse['qrId'];
+    const maibMiaQrDetailsResponse = await maibMiaApiRequest.qrDetails(qrId, maibMiaToken);
+    console.debug(maibMiaQrDetailsResponse);
+
+    //Display List of QR Codes
+    const maibMiaQrListParams = {
+        'count': 10,
+        'offset': 0,
+        'amountFrom': 10.00,
+        'amountTo': 100.00,
+        'sortBy': 'createdAt',
+        'order': 'desc'
+    }
+
+    const maibMiaQrListResponse = await maibMiaApiRequest.qrList(maibMiaQrListParams, maibMiaToken);
+    console.debug(maibMiaQrListResponse);
 
     // Perform a test QR payment
     const maibTestPayData = {
@@ -63,6 +122,18 @@ async function testPayment() {
 
     const maibMiaPaymentRefundResponse = await maibMiaApiRequest.paymentRefund(payId, maibMiaPaymentRefundData, maibMiaToken);
     console.debug(maibMiaPaymentRefundResponse);
+
+    // Retrieve List of Payments
+    const maibMiaPaymentListParams = {
+        'count': 10,
+        'offset': 0,
+        'qrId': qrId,
+        'sortBy': 'executedAt',
+        'order': 'asc'
+    }
+
+    const maibMiaPaymentListResponse = await maibMiaApiRequest.paymentList(maibMiaPaymentListParams, maibMiaToken);
+    console.debug(maibMiaPaymentListResponse);
 }
 
 function testValidateCallbackSignature() {

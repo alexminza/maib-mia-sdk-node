@@ -60,11 +60,13 @@ class MaibMiaSdk {
             method: method,
             data: data,
             headers: MaibMiaSdk._getAuthHeaders(token),
-            params: params
+            params: params,
+            // https://github.com/axios/axios/issues/41
+            validateStatus: () => true
         }
 
         const response = await this.client.request(requestConfig);
-        return MaibMiaSdk._handleResponse(response);
+        return MaibMiaSdk._handleResponse(response, url);
     }
 
     /**

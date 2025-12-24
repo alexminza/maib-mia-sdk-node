@@ -8,6 +8,7 @@ const { API_ENDPOINTS, REQUIRED_QR_PARAMS, REQUIRED_QR_HYBRID_PARAMS, REQUIRED_R
 const MaibMiaSdk = require('./MaibMiaSdk');
 
 class MaibMiaApiRequest {
+    //#region Init
     /**
      * Create a new MaibMiaApiRequest instance
      * @param {string} baseUrl - maib MIA API base url
@@ -26,6 +27,7 @@ class MaibMiaApiRequest {
     static create(baseUrl = MaibMiaSdk.DEFAULT_BASE_URL, timeout = MaibMiaSdk.DEFAULT_TIMEOUT) {
         return new MaibMiaApiRequest(baseUrl, timeout);
     }
+    //#endregion
 
     //#region Operation
     /**
