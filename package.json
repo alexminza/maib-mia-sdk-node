@@ -24,7 +24,6 @@
     "author": "Alexander Minza",
     "type": "commonjs",
     "main": "src/index.js",
-    "types": "types/index.d.ts",
     "directories": {
         "test": "test"
     },

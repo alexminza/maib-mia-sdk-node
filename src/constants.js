@@ -32,21 +32,21 @@ const API_ENDPOINTS = {
     MIA_RTP_CANCEL: 'rtp/:rtpId/cancel',
     MIA_RTP_REFUND: 'rtp/:payId/refund',
     MIA_RTP_TEST_ACCEPT: 'rtp/:rtpId/test-accept',
-    MIA_RTP_TEST_REJECT: 'rtp/{id}/test-reject'
+    MIA_RTP_TEST_REJECT: 'rtp/:rtpId/test-reject'
 };
 
 // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-qr-code-static-dynamic#request-parameters-body
-REQUIRED_QR_PARAMS = ['type', 'amountType', 'currency', 'description'];
+const REQUIRED_QR_PARAMS = ['type', 'amountType', 'currency', 'description'];
 // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code#request-body-parameters
-REQUIRED_QR_HYBRID_PARAMS = ['amountType', 'currency'];
+const REQUIRED_QR_HYBRID_PARAMS = ['amountType', 'currency'];
 // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code/create-extension-for-qr-code-by-id#request-parameters-body
-REQUIRED_QR_EXTENSION_PARAMS = ['expiresAt', 'description'];
+const REQUIRED_QR_EXTENSION_PARAMS = ['expiresAt', 'description'];
 // https://docs.maibmerchants.md/mia-qr-api/en/payment-simulation-sandbox#request-parameters-body-json
-REQUIRED_TEST_PAY_PARAMS = ['qrId', 'amount', 'iban', 'currency', 'payerName'];
+const REQUIRED_TEST_PAY_PARAMS = ['qrId', 'amount', 'iban', 'currency', 'payerName'];
 // https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/create-a-new-payment-request-rtp#request-body-parameters
-REQUIRED_RTP_PARAMS = ['alias', 'amount', 'currency', 'expiresAt', 'description'];
+const REQUIRED_RTP_PARAMS = ['alias', 'amount', 'currency', 'expiresAt', 'description'];
 // https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-acceptance-of-a-payment-request#request-body-parameters
-REQUIRED_TEST_ACCEPT_PARAMS = ['amount', 'currency'];
+const REQUIRED_TEST_ACCEPT_PARAMS = ['amount', 'currency'];
 
 const DEFAULT_TIMEOUT = 30000; // milliseconds
 

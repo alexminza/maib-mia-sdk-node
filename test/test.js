@@ -186,12 +186,26 @@ async function testRtpPayment() {
         'currency': 'MDL'
     }
 
-    const maibMiaRtpTestAccept = await maibMiaApiRequest.rtpTestAccept(rtpId, maibMiaRtpTestAcceptData, maibMiaToken);
-    console.debug(maibMiaRtpTestAccept);
+    const maibMiaRtpTestAcceptResponse = await maibMiaApiRequest.rtpTestAccept(rtpId, maibMiaRtpTestAcceptData, maibMiaToken);
+    console.debug(maibMiaRtpTestAcceptResponse);
 
-    payId = maibMiaRtpTestAccept['payId']
+    payId = maibMiaRtpTestAcceptResponse['payId']
     const maibMiaRtpRefundResponse = await maibMiaApiRequest.rtpRefund(payId, maibMiaRtpRefundData, maibMiaToken);
     console.debug(maibMiaRtpRefundResponse);
+
+    const maibMiaRtpCreate2Response = await maibMiaApiRequest.rtpCreate(maibMiaRtpCreateData, maibMiaToken);
+    console.debug(maibMiaRtpCreate2Response);
+
+    const rtpId2 = maibMiaRtpCreate2Response['rtpId']
+    //const maibMiaRtpTestAccept2Response = await maibMiaApiRequest.rtpTestReject(rtpId2, maibMiaToken);
+    //console.debug(maibMiaRtpTestAccept2Response);
+
+    const maibMiaRtpCancelData = {
+        'reason': 'Test cancel reason'
+    }
+
+    const maibMiaRtpCancel2Response = await maibMiaApiRequest.rtpCancel(rtpId2, maibMiaRtpCancelData, maibMiaToken);
+    console.debug(maibMiaRtpCancel2Response);
 }
 
 function testValidateCallbackSignature() {
@@ -218,6 +232,6 @@ function testValidateCallbackSignature() {
     console.log('Validation Result:', validateCallbackResult);
 }
 
-//testQrPayment();
+testQrPayment();
 testRtpPayment();
-//testValidateCallbackSignature();
+testValidateCallbackSignature();
