@@ -10,7 +10,7 @@ const CLIENT_ID = process.env.MAIB_MIA_CLIENT_ID;
 const CLIENT_SECRET = process.env.MAIB_MIA_CLIENT_SECRET;
 const SIGNATURE_KEY = process.env.MAIB_MIA_SIGNATURE_KEY;
 
-async function testPayment() {
+async function testQrPayment() {
     // Get Access Token with Client ID and Client Secret
     const maibMiaAuth = await MaibMiaAuthRequest
         .create(MaibMiaSdk.SANDBOX_BASE_URL)
@@ -136,6 +136,64 @@ async function testPayment() {
     console.debug(maibMiaPaymentListResponse);
 }
 
+async function testRtpPayment() {
+    // Get Access Token with Client ID and Client Secret
+    const maibMiaAuth = await MaibMiaAuthRequest
+        .create(MaibMiaSdk.SANDBOX_BASE_URL)
+        .generateToken(CLIENT_ID, CLIENT_SECRET);
+
+    const maibMiaToken = maibMiaAuth.accessToken;
+    const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
+
+    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    const maibMiaRtpCreateData = {
+        'alias': '37369112221',
+        'amount': 150.00,
+        'expiresAt': maibMiaExpiresAt,
+        'currency': 'MDL',
+        'description': 'Invoice #123',
+        'orderId': 'INV123',
+        'terminalId': 'P011111',
+        'callbackUrl': 'https://example.com/callback',
+        'redirectUrl': 'https://example.com/success'
+    }
+
+    const maibMiaRtpCreateResponse = await maibMiaApiRequest.rtpCreate(maibMiaRtpCreateData, maibMiaToken);
+    console.debug(maibMiaRtpCreateResponse);
+
+    const rtpId = maibMiaRtpCreateResponse['rtpId'];
+    const maibMiaRtpStatusResponse = await maibMiaApiRequest.rtpStatus(rtpId, maibMiaToken);
+    console.debug(maibMiaRtpStatusResponse);
+
+    const maibMiaRtpListParams = {
+        'count': 10,
+        'offset': 0,
+        'amount': 10.00,
+        'sortBy': 'createdAt',
+        'order': 'desc'
+    }
+
+    const maibMiaRtpListResponse = await maibMiaApiRequest.rtpList(maibMiaRtpListParams, maibMiaToken);
+    console.debug(maibMiaRtpListResponse);
+
+    const maibMiaRtpRefundData = {
+        'reason': 'Test refund reason'
+    }
+
+    const maibMiaRtpTestAcceptData = {
+        'amount': 150.00,
+        'currency': 'MDL'
+    }
+
+    const maibMiaRtpTestAccept = await maibMiaApiRequest.rtpTestAccept(rtpId, maibMiaRtpTestAcceptData, maibMiaToken);
+    console.debug(maibMiaRtpTestAccept);
+
+    payId = maibMiaRtpTestAccept['payId']
+    const maibMiaRtpRefundResponse = await maibMiaApiRequest.rtpRefund(payId, maibMiaRtpRefundData, maibMiaToken);
+    console.debug(maibMiaRtpRefundResponse);
+}
+
 function testValidateCallbackSignature() {
     const callbackData = {
         "result": {
@@ -160,5 +218,6 @@ function testValidateCallbackSignature() {
     console.log('Validation Result:', validateCallbackResult);
 }
 
-testPayment();
-testValidateCallbackSignature();
+//testQrPayment();
+testRtpPayment();
+//testValidateCallbackSignature();

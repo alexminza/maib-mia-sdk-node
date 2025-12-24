@@ -98,8 +98,8 @@ class MaibMiaSdk {
             throw new Error(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field.`);
         }
 
-        if(response.errors) {
-            const error = response.errors[0];
+        if(response.data.errors) {
+            const error = response.data.errors[0];
             throw new Error(`Error sending request to endpoint ${endpoint}: ${error.errorMessage} (${error.errorCode})`);
         }
 
