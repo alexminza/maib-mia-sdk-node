@@ -32,11 +32,11 @@ async function testPayment() {
     }
 
     const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
-    const maibMiaCreateQrResponse = await maibMiaApiRequest.createQr(maibMiaQrData, maibMiaToken);
+    const maibMiaCreateQrResponse = await maibMiaApiRequest.qrCreate(maibMiaQrData, maibMiaToken);
 
     // Get QR details
     const qrId = maibMiaCreateQrResponse['qrId'];
-    const qrDetails = await maibMiaApiRequest.getQrDetails(qrId, maibMiaToken);
+    const qrDetails = await maibMiaApiRequest.qrDetails(qrId, maibMiaToken);
     console.debug(qrDetails);
 
     // Perform a test QR payment
@@ -53,7 +53,7 @@ async function testPayment() {
 
     // Get payment details
     const payId = maibMiaTestPayResponse['payId'];
-    const maibMiaPaymentDetailsResponse = await maibMiaApiRequest.getPaymentDetails(payId, maibMiaToken);
+    const maibMiaPaymentDetailsResponse = await maibMiaApiRequest.paymentDetails(payId, maibMiaToken);
     console.debug(maibMiaPaymentDetailsResponse);
 
     // Refund payment
@@ -61,7 +61,7 @@ async function testPayment() {
         'reason': 'Test refund reason'
     }
 
-    const maibMiaPaymentRefundResponse = await maibMiaApiRequest.refundPayment(payId, maibMiaPaymentRefundData, maibMiaToken);
+    const maibMiaPaymentRefundResponse = await maibMiaApiRequest.paymentRefund(payId, maibMiaPaymentRefundData, maibMiaToken);
     console.debug(maibMiaPaymentRefundResponse);
 }
 

@@ -21,21 +21,7 @@ function replacePath(path, params) {
     return result;
 }
 
-/**
- * Validate required fields in an object
- * @param {Object} data - Data object to validate
- * @param {string[]} requiredFields - Array of required field names
- * @throws {Error} - If any required field is missing
- */
-function validateRequiredFields(data, requiredFields) {
-    const missingFields = requiredFields.filter(field =>
-        data[field] === undefined || data[field] === null
-    );
 
-    if (missingFields.length > 0) {
-        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-    }
-}
 
 /**
  * Format date to ISO 8601 string
@@ -68,7 +54,6 @@ function createError(message, details = {}) {
 
 module.exports = {
     replacePath,
-    validateRequiredFields,
     formatDate,
     createError
 };
