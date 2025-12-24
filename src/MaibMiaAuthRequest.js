@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 const { API_ENDPOINTS, DEFAULT_TIMEOUT } = require('./constants');
-const { createError } = require('./utils');
+const { handleResponse } = require('./utils');
 
 class MaibMiaAuthRequest {
     /**
@@ -50,7 +50,7 @@ class MaibMiaAuthRequest {
             tokenData
         );
 
-        return tokenResponse.data.result;
+        return handleResponse(tokenResponse);
     }
 }
 

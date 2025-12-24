@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 const { API_ENDPOINTS, DEFAULT_TIMEOUT, REQUIRED_QR_PARAMS, REQUIRED_QR_HYBRID_PARAMS, REQUIRED_RTP_PARAMS } = require('./constants');
-const { createError } = require('./utils');
+const { handleResponse } = require('./utils');
 
 class MaibMiaApiRequest {
     /**
@@ -70,7 +70,7 @@ class MaibMiaApiRequest {
         }
 
         const response = await this.client.request(requestConfig);
-        return response.data.result || response.data;
+        return handleResponse(response);
     }
 
     /**
@@ -356,29 +356,6 @@ class MaibMiaApiRequest {
         return this._executeOperation(endpoint, token);
     }
     //#endregion
-
-    /**
-     * Handle API errors
-     * @param {string} message - Error message
-     * @param {Error} error - Original error
-     * @returns {Error} - Formatted error
-     */
-    _handleError(message, error) {
-        if (error.response) {
-            return createError(
-                `${message}: ${error.response.data?.message || error.message}`,
-                {
-                    status: error.response.status,
-                    data: error.response.data,
-                    headers: error.response.headers
-                }
-            );
-        }
-
-        return createError(`${message}: ${error.message}`, {
-            originalError: error
-        });
-    }
 }
 
 module.exports = MaibMiaApiRequest;
