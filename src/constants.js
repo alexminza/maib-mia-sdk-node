@@ -35,29 +35,6 @@ const API_ENDPOINTS = {
     MIA_RTP_TEST_REJECT: 'rtp/{id}/test-reject'
 };
 
-const QR_TYPES = {
-    DYNAMIC: 'Dynamic',
-    STATIC: 'Static'
-};
-
-const AMOUNT_TYPES = {
-    FIXED: 'Fixed',
-    FLEXIBLE: 'Flexible'
-};
-
-const CURRENCIES = {
-    MDL: 'MDL',
-    EUR: 'EUR',
-    USD: 'USD'
-};
-
-const QR_STATUS = {
-    PENDING: 'Pending',
-    PAID: 'Paid',
-    EXPIRED: 'Expired',
-    DELETED: 'Deleted'
-};
-
 // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-qr-code-static-dynamic#request-parameters-body
 REQUIRED_QR_PARAMS = ['type', 'amountType', 'currency', 'description'];
 // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-initiation/create-hybrid-qr-code#request-body-parameters
@@ -75,11 +52,7 @@ const DEFAULT_TIMEOUT = 30000; // milliseconds
 
 module.exports = {
     SANDBOX_BASE_URL,
-    PRODUCTION_BASE_URL: DEFAULT_BASE_URL,
+    DEFAULT_BASE_URL,
     API_ENDPOINTS,
-    QR_TYPES,
-    AMOUNT_TYPES,
-    CURRENCIES,
-    QR_STATUS,
     DEFAULT_TIMEOUT
 };

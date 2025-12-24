@@ -5,7 +5,7 @@
 
 const crypto = require('crypto');
 
-const { SANDBOX_BASE_URL, PRODUCTION_BASE_URL } = require('./constants');
+const { SANDBOX_BASE_URL, DEFAULT_BASE_URL } = require('./constants');
 
 class MaibMiaSdk {
     /**
@@ -18,8 +18,8 @@ class MaibMiaSdk {
     /**
      * Production base URL
      */
-    static get PRODUCTION_BASE_URL() {
-        return PRODUCTION_BASE_URL;
+    static get DEFAULT_BASE_URL() {
+        return DEFAULT_BASE_URL;
     }
 
     /**
