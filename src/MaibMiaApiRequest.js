@@ -283,7 +283,7 @@ class MaibMiaApiRequest {
      * List all payment requests
      * @param {Object} params - Retrieval params
      * @param {string} token - Access token
-     * @returns - Retrieval response
+     * @returns {Promise<Object>} - Retrieval response
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/list-all-payment-requests
      */
     async rtpList(params, token) {
