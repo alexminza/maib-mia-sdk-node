@@ -6,15 +6,15 @@ const {
     MaibMiaApiRequest
 } = require('../src');
 
-const CLIENT_ID = process.env.MAIB_MIA_CLIENT_ID;
-const CLIENT_SECRET = process.env.MAIB_MIA_CLIENT_SECRET;
-const SIGNATURE_KEY = process.env.MAIB_MIA_SIGNATURE_KEY;
+const MAIB_MIA_CLIENT_ID = process.env.MAIB_MIA_CLIENT_ID;
+const MAIB_MIA_CLIENT_SECRET = process.env.MAIB_MIA_CLIENT_SECRET;
+const MAIB_MIA_SIGNATURE_KEY = process.env.MAIB_MIA_SIGNATURE_KEY;
 
 async function testQrPayment() {
     // Get Access Token with Client ID and Client Secret
     const maibMiaAuth = await MaibMiaAuthRequest
         .create(MaibMiaSdk.SANDBOX_BASE_URL)
-        .generateToken(CLIENT_ID, CLIENT_SECRET);
+        .generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
 
     const maibMiaToken = maibMiaAuth.accessToken;
     const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
@@ -31,7 +31,7 @@ async function testQrPayment() {
         'description': 'Order #123',
         'callbackUrl': 'https://example.com/callback',
         'redirectUrl': 'https://example.com/success'
-    }
+    };
 
     const maibMiaQrCreateResponse = await maibMiaApiRequest.qrCreate(maibMiaQrData, maibMiaToken);
     console.debug(maibMiaQrCreateResponse);
@@ -49,7 +49,7 @@ async function testQrPayment() {
             'callbackUrl': 'https://example.com/callback',
             'redirectUrl': 'https://example.com/success'
         }
-    }
+    };
 
     const maibMiaQrCreateHybridResponse = await maibMiaApiRequest.qrCreateHybrid(maibMiaQrHybridData, maibMiaToken);
     console.debug(maibMiaQrCreateHybridResponse);
@@ -62,15 +62,15 @@ async function testQrPayment() {
         'orderId': '456',
         'callbackUrl': 'https://example.com/callback',
         'redirectUrl': 'https://example.com/success'
-    }
+    };
 
     const qrHybridId = maibMiaQrCreateHybridResponse['qrId'];
-    // const maibMiaQrCreateExtensionResponse = await maibMiaApiRequest.qrCreateExtension(qrHybridId, maibMiaQrExtensionData, maibMiaToken);
-    // console.debug(maibMiaQrCreateExtensionResponse);
+    const maibMiaQrCreateExtensionResponse = await maibMiaApiRequest.qrCreateExtension(qrHybridId, maibMiaQrExtensionData, maibMiaToken);
+    console.debug(maibMiaQrCreateExtensionResponse);
 
     const maibMiaQrCancelData = {
         'reason': 'Test cancel reason'
-    }
+    };
 
     // Cancel Active QR Extension (Hybrid)
     const maibMiaQrCancelExtensionResponse = await maibMiaApiRequest.qrCancelExtension(qrHybridId, maibMiaQrCancelData, maibMiaToken);
@@ -93,7 +93,7 @@ async function testQrPayment() {
         'amountTo': 100.00,
         'sortBy': 'createdAt',
         'order': 'desc'
-    }
+    };
 
     const maibMiaQrListResponse = await maibMiaApiRequest.qrList(maibMiaQrListParams, maibMiaToken);
     console.debug(maibMiaQrListResponse);
@@ -105,7 +105,7 @@ async function testQrPayment() {
         'iban': 'MD88AG000000011621810140',
         'currency': maibMiaQrData['currency'],
         'payerName': 'TEST QR PAYMENT'
-    }
+    };
 
     const maibMiaTestPayResponse = await maibMiaApiRequest.testPay(maibTestPayData, maibMiaToken);
     console.debug(maibMiaTestPayResponse);
@@ -118,7 +118,7 @@ async function testQrPayment() {
     // Refund payment
     const maibMiaPaymentRefundData = {
         'reason': 'Test refund reason'
-    }
+    };
 
     const maibMiaPaymentRefundResponse = await maibMiaApiRequest.paymentRefund(payId, maibMiaPaymentRefundData, maibMiaToken);
     console.debug(maibMiaPaymentRefundResponse);
@@ -130,7 +130,7 @@ async function testQrPayment() {
         'qrId': qrId,
         'sortBy': 'executedAt',
         'order': 'asc'
-    }
+    };
 
     const maibMiaPaymentListResponse = await maibMiaApiRequest.paymentList(maibMiaPaymentListParams, maibMiaToken);
     console.debug(maibMiaPaymentListResponse);
@@ -140,26 +140,26 @@ async function testRtpPayment() {
     // Get Access Token with Client ID and Client Secret
     const maibMiaAuth = await MaibMiaAuthRequest
         .create(MaibMiaSdk.SANDBOX_BASE_URL)
-        .generateToken(CLIENT_ID, CLIENT_SECRET);
+        .generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
 
     const maibMiaToken = maibMiaAuth.accessToken;
     const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
 
     const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    const maibMiaRtpCreateData = {
+    const maibMiaRtpData = {
         'alias': '37369112221',
         'amount': 150.00,
         'expiresAt': maibMiaExpiresAt,
         'currency': 'MDL',
         'description': 'Invoice #123',
-        'orderId': 'INV123',
+        'orderId': '123',
         'terminalId': 'P011111',
         'callbackUrl': 'https://example.com/callback',
         'redirectUrl': 'https://example.com/success'
-    }
+    };
 
-    const maibMiaRtpCreateResponse = await maibMiaApiRequest.rtpCreate(maibMiaRtpCreateData, maibMiaToken);
+    const maibMiaRtpCreateResponse = await maibMiaApiRequest.rtpCreate(maibMiaRtpData, maibMiaToken);
     console.debug(maibMiaRtpCreateResponse);
 
     const rtpId = maibMiaRtpCreateResponse['rtpId'];
@@ -172,19 +172,19 @@ async function testRtpPayment() {
         'amount': 10.00,
         'sortBy': 'createdAt',
         'order': 'desc'
-    }
+    };
 
     const maibMiaRtpListResponse = await maibMiaApiRequest.rtpList(maibMiaRtpListParams, maibMiaToken);
     console.debug(maibMiaRtpListResponse);
 
     const maibMiaRtpRefundData = {
         'reason': 'Test refund reason'
-    }
+    };
 
     const maibMiaRtpTestAcceptData = {
         'amount': 150.00,
         'currency': 'MDL'
-    }
+    };
 
     const maibMiaRtpTestAcceptResponse = await maibMiaApiRequest.rtpTestAccept(rtpId, maibMiaRtpTestAcceptData, maibMiaToken);
     console.debug(maibMiaRtpTestAcceptResponse);
@@ -193,7 +193,7 @@ async function testRtpPayment() {
     const maibMiaRtpRefundResponse = await maibMiaApiRequest.rtpRefund(payId, maibMiaRtpRefundData, maibMiaToken);
     console.debug(maibMiaRtpRefundResponse);
 
-    const maibMiaRtpCreate2Response = await maibMiaApiRequest.rtpCreate(maibMiaRtpCreateData, maibMiaToken);
+    const maibMiaRtpCreate2Response = await maibMiaApiRequest.rtpCreate(maibMiaRtpData, maibMiaToken);
     console.debug(maibMiaRtpCreate2Response);
 
     const rtpId2 = maibMiaRtpCreate2Response['rtpId']
@@ -202,7 +202,7 @@ async function testRtpPayment() {
 
     const maibMiaRtpCancelData = {
         'reason': 'Test cancel reason'
-    }
+    };
 
     const maibMiaRtpCancel2Response = await maibMiaApiRequest.rtpCancel(rtpId2, maibMiaRtpCancelData, maibMiaToken);
     console.debug(maibMiaRtpCancel2Response);
@@ -210,25 +210,25 @@ async function testRtpPayment() {
 
 function testValidateCallbackSignature() {
     const callbackData = {
-        "result": {
-            "qrId": "c3108b2f-6c2e-43a2-bdea-123456789012",
-            "extensionId": "3fe7f013-23a6-4d09-a4a4-123456789012",
-            "qrStatus": "Paid",
-            "payId": "eb361f48-bb39-45e2-950b-123456789012",
-            "referenceId": "MIA0001234567",
-            "orderId": "123",
-            "amount": 50.00,
-            "commission": 0.1,
-            "currency": "MDL",
-            "payerName": "TEST QR PAYMENT",
-            "payerIban": "MD88AG000000011621810140",
-            "executedAt": "2025-04-18T14:04:11.81145+00:00",
-            "terminalId": null
+        'result': {
+            'qrId': 'c3108b2f-6c2e-43a2-bdea-123456789012',
+            'extensionId': '3fe7f013-23a6-4d09-a4a4-123456789012',
+            'qrStatus': 'Paid',
+            'payId': 'eb361f48-bb39-45e2-950b-123456789012',
+            'referenceId': 'MIA0001234567',
+            'orderId': '123',
+            'amount': 50.00,
+            'commission': 0.1,
+            'currency': 'MDL',
+            'payerName': 'TEST QR PAYMENT',
+            'payerIban': 'MD88AG000000011621810140',
+            'executedAt': '2025-04-18T14:04:11.81145+00:00',
+            'terminalId': null
         },
-        "signature": "fHM+l4L1ycFWZDRTh/Vr8oybq1Q1xySdjyvmFQCmZ4s="
-    }
+        'signature': 'fHM+l4L1ycFWZDRTh/Vr8oybq1Q1xySdjyvmFQCmZ4s='
+    };
 
-    const validateCallbackResult = MaibMiaSdk.validateCallbackSignature(callbackData, SIGNATURE_KEY);
+    const validateCallbackResult = MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY);
     console.log('Validation Result:', validateCallbackResult);
 }
 
