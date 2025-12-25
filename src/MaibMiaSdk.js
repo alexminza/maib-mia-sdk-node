@@ -24,9 +24,62 @@ class MaibMiaSdk {
             baseURL: baseUrl,
             timeout: timeout,
             headers: {
-                'User-Agent': `${packageName}/${packageVersion}`
+                'User-Agent': `${packageName}-node/${packageVersion}`
             }
         });
+
+        this.setupLogging();
+    }
+
+    setupLogging() {
+        this.client.interceptors.request.use(
+            (config) => {
+                const requestMethod = config.method.toUpperCase();
+                const requestUrl = axios.getUri(config);
+                const requestExtra = {
+                    'method': requestMethod,
+                    'url': requestUrl,
+                    'data': config.data,
+                    'params': config.params,
+                    'headers': config.headers?.toJSON?.() || { ...config.headers }
+                }
+
+                console.debug(`${packageName} Request: ${requestMethod} ${requestUrl}`, requestExtra);
+                return config;
+            },
+            (error) => {
+                return Promise.reject(error);
+            }
+        );
+
+        this.client.interceptors.response.use(
+            (response) => {
+                const requestMethod = response.config.method.toUpperCase();
+                const requestUrl = axios.getUri(response.config);
+                const responseExtra = {
+                    'method': requestMethod,
+                    'url': requestUrl,
+                    'data': response.data,
+                    'status': response.status,
+                }
+
+                console.debug(`${packageName} Response: ${response.status} ${requestMethod} ${requestUrl}`, responseExtra);
+                return response;
+            },
+            (error) => {
+                const requestMethod = error.response?.config.method.toUpperCase();
+                const requestUrl = axios.getUri(error.response?.config);
+                const errorExtra = {
+                    'method': requestMethod,
+                    'url': requestUrl,
+                    'data': error.response?.data,
+                    'status': error.response?.status
+                }
+
+                console.error(`${packageName} Error: ${error.response?.status} ${error.response?.data}`, errorExtra);
+                return Promise.reject(error);
+            }
+        );
     }
 
     /**
@@ -59,12 +112,15 @@ class MaibMiaSdk {
      * @param {string} token - Access token
      * @returns {Promise<Object>} API request response
      */
-    async _sendRequest(method, url, data=null, params=null, token=null) {
+    async _sendRequest(method, url, data = null, params = null, token = null) {
         const requestConfig = {
             url: url,
             method: method,
             data: data,
-            headers: MaibMiaSdk._getAuthHeaders(token),
+            headers: {
+                ...this.client.defaults.headers.common,
+                ...MaibMiaSdk._getAuthHeaders(token)
+            },
             params: params,
             // https://github.com/axios/axios/issues/41
             validateStatus: () => true
@@ -103,7 +159,7 @@ class MaibMiaSdk {
             throw new Error(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field.`);
         }
 
-        if(response.data.errors) {
+        if (response.data.errors) {
             const error = response.data.errors[0];
             throw new Error(`Error sending request to endpoint ${endpoint}: ${error.errorMessage} (${error.errorCode})`);
         }
