@@ -320,7 +320,7 @@ class MaibMiaApiRequest {
      * Simulate rejection of a payment request
      * @param {string} rtpId - RTP ID
      * @param {string} token - Access token
-     * @returns {Promise<Object>} - Test accept response
+     * @returns {Promise<Object>} - Test reject response
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-rejection-of-a-payment-request
      */
     async rtpTestReject(rtpId, token) {
