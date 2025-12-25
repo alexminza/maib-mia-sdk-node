@@ -35,7 +35,8 @@
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
         "lint": "eslint src/ test/",
-        "lint:fix": "eslint src/ test/ --fix"
+        "lint:fix": "eslint src/ test/ --fix",
+        "prepublishOnly": "npm test && npm run lint"
     },
     "dependencies": {
         "axios": "^1.6.0"
