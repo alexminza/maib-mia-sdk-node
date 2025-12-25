@@ -149,7 +149,7 @@ class MaibMiaApiRequest {
      * @param {string} qrId - QR code ID
      * @param {string} token - Access token
      * @returns {Promise<Object>} - QR details
-     * @lik https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-qr-details-by-id
+     * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-qr-details-by-id
      */
     async qrDetails(qrId, token) {
         const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_QR_ID, { qrId });
