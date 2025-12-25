@@ -110,7 +110,7 @@ const validateCallbackResult = MaibMiaSdk.validateCallbackSignature(callbackData
 ### Get QR details
 
 ```javascript
-const qrId = maibMiaQrCreateResponse['qrId'];
+const qrId = maibMiaQrCreateResponse.qrId;
 const maibMiaQrDetailsResponse = await maibMiaApiRequest.qrDetails(qrId, maibMiaToken);
 ```
 
@@ -119,9 +119,9 @@ const maibMiaQrDetailsResponse = await maibMiaApiRequest.qrDetails(qrId, maibMia
 ```javascript
 const maibTestPayData = {
     'qrId': qrId,
-    'amount': maibMiaQrData['amount'],
+    'amount': maibMiaQrData.amount,
     'iban': 'MD88AG000000011621810140',
-    'currency': maibMiaQrData['currency'],
+    'currency': maibMiaQrData.currency,
     'payerName': 'TEST QR PAYMENT'
 };
 
@@ -131,7 +131,7 @@ const maibMiaTestPayResponse = await maibMiaApiRequest.testPay(maibTestPayData, 
 ### Get payment details
 
 ```javascript
-const payId = maibMiaTestPayResponse['payId'];
+const payId = maibMiaTestPayResponse.payId;
 const maibMiaPaymentDetailsResponse = await maibMiaApiRequest.paymentDetails(payId, maibMiaToken);
 ```
 
