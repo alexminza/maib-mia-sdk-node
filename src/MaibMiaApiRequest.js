@@ -236,7 +236,8 @@ class MaibMiaApiRequest {
      * @param {Object} params - Retrieval params
      * @param {string} token - Access token
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-list-of-payments-with-filtering-options
-     */
+     * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/retrieve-list-of-payments-with-filtering-options
+     * @returns {Promise<Object>} - Retrieval response
     async paymentList(params, token) {
         return this._executeOperation(API_ENDPOINTS.MIA_PAYMENTS, token, null, null, 'GET', params);
     }
