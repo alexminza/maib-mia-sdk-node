@@ -28,8 +28,6 @@ class MaibMiaSdk {
                 'User-Agent': `${packageName}-node/${packageVersion}`
             }
         });
-
-        this.setupLogging();
     }
 
     setupLogging() {
