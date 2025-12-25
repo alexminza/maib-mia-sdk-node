@@ -71,7 +71,7 @@ class MaibMiaApiRequest {
      */
     static _validateIdParam(entityId) {
         if (!entityId) {
-            throw new MaibMiaValidationError('Invalid ID parameter. Should be string of 36 characters.');
+            throw new MaibMiaValidationError('ID parameter is required');
         }
     }
 
