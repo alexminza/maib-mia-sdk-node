@@ -3,6 +3,8 @@
  * Main Class
  */
 
+const { name: packageName, version: packageVersion } = require('../package.json');
+
 const crypto = require('crypto');
 const axios = require('axios');
 
@@ -20,7 +22,10 @@ class MaibMiaSdk {
 
         this.client = axios.create({
             baseURL: baseUrl,
-            timeout: timeout
+            timeout: timeout,
+            headers: {
+                'User-Agent': `${packageName}/${packageVersion}`
+            }
         });
     }
 
