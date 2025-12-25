@@ -34,52 +34,42 @@ class MaibMiaSdk {
     setupLogging() {
         this.client.interceptors.request.use(
             (config) => {
-                const requestMethod = config.method.toUpperCase();
-                const requestUrl = axios.getUri(config);
-                const requestExtra = {
-                    'method': requestMethod,
-                    'url': requestUrl,
-                    'data': config.data,
-                    'params': config.params,
-                    'headers': config.headers?.toJSON?.() || { ...config.headers }
-                }
-
-                console.debug(`${packageName} Request: ${requestMethod} ${requestUrl}`, requestExtra);
+                const logData = MaibMiaSdk._getLogData(config, config);
+                console.debug(`${packageName} Request: ${logData.method} ${logData.url}`, logData);
                 return config;
             },
             (error) => {
+                console.error(`${packageName} Request: ${error.message}`, error);
                 return Promise.reject(error);
             }
         );
 
         this.client.interceptors.response.use(
             (response) => {
-                const requestMethod = response.config.method.toUpperCase();
-                const requestUrl = axios.getUri(response.config);
-                const responseExtra = {
-                    'method': requestMethod,
-                    'url': requestUrl,
-                    'data': response.data,
-                    'status': response.status,
-                }
-
-                console.debug(`${packageName} Response: ${response.status} ${requestMethod} ${requestUrl}`, responseExtra);
+                const logData = MaibMiaSdk._getLogData(response, response?.config);
+                console.debug(`${packageName} Response: ${logData.status} ${logData.method} ${logData.url}`, logData);
                 return response;
             },
             (error) => {
-                const requestMethod = error.response?.config.method.toUpperCase();
-                const requestUrl = axios.getUri(error.response?.config);
-                const errorExtra = {
-                    'method': requestMethod,
-                    'url': requestUrl,
-                    'data': error.response?.data,
-                    'status': error.response?.status
-                }
-
-                console.error(`${packageName} Error: ${error.response?.status} ${error.response?.data}`, errorExtra);
+                const config = error.response?.config || error.config;
+                const logData = MaibMiaSdk._getLogData(error.response, config);
+                console.error(`${packageName} Error: ${logData.status} ${logData.data}`, logData, error);
                 return Promise.reject(error);
             }
         );
+    }
+
+    static _getLogData(object, config) {
+        const logData = {
+            'method': config?.method?.toUpperCase(),
+            'url': config ? axios.getUri(config) : undefined,
+            'data': object?.data,
+            'params': config?.params,
+            'headers': object?.headers?.toJSON?.() || config?.headers?.toJSON?.(),
+            'status': object?.status
+        }
+
+        return logData;
     }
 
     /**
