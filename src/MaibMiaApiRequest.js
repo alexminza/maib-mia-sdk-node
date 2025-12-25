@@ -93,8 +93,13 @@ class MaibMiaApiRequest {
      * @throws {MaibMiaValidationError} - If any required parameter is missing
      */
     static _validateParams(data, requiredParams) {
-        if (!data || !requiredParams)
+        if (!requiredParams || requiredParams.length === 0) {
             return;
+        }
+
+        if (!data) {
+            throw new MaibMiaValidationError(`Missing required parameters: ${requiredParams.join(', ')}`);
+        }
 
         const missingParams = requiredParams.filter(field =>
             data[field] === undefined || data[field] === null
