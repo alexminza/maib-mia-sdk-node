@@ -67,6 +67,7 @@ class MaibMiaApiRequest {
     /**
      * Validates Entity ID
      * @param {string} entityId - Entity ID
+     * @throws {MaibMiaValidationError} - If Entity ID parameter is invalid
      */
     static _validateIdParam(entityId) {
         if (!entityId) {
@@ -77,6 +78,7 @@ class MaibMiaApiRequest {
     /**
      * Validates the access token
      * @param {string} token - Access token
+     * @throws {MaibMiaValidationError} - If Access token parameter is invalid
      */
     static _validateAccessToken(token) {
         if (!token) {
@@ -85,10 +87,10 @@ class MaibMiaApiRequest {
     }
 
     /**
-     * Validate required fields in an object
+     * Validate required parameters
      * @param {Object} data - Data object to validate
-     * @param {string[]} requiredParams - Array of required field names
-     * @throws {MaibMiaValidationError} - If any required field is missing
+     * @param {string[]} requiredParams - Array of required parameter names
+     * @throws {MaibMiaValidationError} - If any required parameter is missing
      */
     static _validateParams(data, requiredParams) {
         if (!data || !requiredParams)

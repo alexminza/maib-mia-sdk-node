@@ -34,6 +34,7 @@ class MaibMiaAuthRequest {
      * @param {string} clientSecret - Client secret
      * @returns {Promise<Object>} - Token response object
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/authentication/obtain-authentication-token
+     * @throws {MaibMiaValidationError} - If Client ID or Client secret are invalid
      */
     async generateToken(clientId, clientSecret) {
         if (!clientId || !clientSecret) {

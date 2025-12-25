@@ -138,6 +138,7 @@ class MaibMiaSdk {
      * Handles errors returned by the API
      * @param {axios.AxiosResponse} response - Response object
      * @param {string} endpoint - API endpoint
+     * @throws {MaibMiaApiError} - When received a server error from the API
      */
     static _handleResponse(response, endpoint) {
         if (!response.data)
@@ -167,6 +168,7 @@ class MaibMiaSdk {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/examples/signature-key-verification
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/callback-notifications#signature-validation
      * @link https://docs.maibmerchants.md/request-to-pay/api-reference/examples/signature-key-verification
+     * @throws {MaibMiaValidationError} - If Callback data or Signature Key are invalid
      */
     static validateCallbackSignature(callbackData, signatureKey) {
         if (!signatureKey) {
