@@ -149,9 +149,9 @@ class MaibMiaSdk {
             throw new MaibMiaApiError(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field`, response);
         }
 
-        if (response.data.errors) {
-            const error = response.data.errors[0];
-            throw new MaibMiaApiError(`Error sending request to endpoint ${endpoint}: ${error.errorMessage} (${error.errorCode})`, response);
+        if (response.data.errors && response.data.errors.length > 0) {
+            const errorMessages = response.data.errors.map(error => `${error.errorMessage} (${error.errorCode})`).join('; ');
+            throw new MaibMiaApiError(`Error sending request to endpoint ${endpoint}: ${errorMessages}`, response);
         }
 
         throw new MaibMiaApiError(`Invalid response received from server for endpoint ${endpoint}: missing 'ok' and 'errors' fields`, response);
