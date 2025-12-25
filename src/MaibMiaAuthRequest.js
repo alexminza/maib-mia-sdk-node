@@ -4,6 +4,7 @@
  */
 
 const { API_ENDPOINTS } = require('./constants');
+const { MaibMiaValidationError } = require('./errors');
 
 const MaibMiaSdk = require('./MaibMiaSdk');
 
@@ -36,7 +37,7 @@ class MaibMiaAuthRequest {
      */
     async generateToken(clientId, clientSecret) {
         if (!clientId || !clientSecret) {
-            throw new Error('Client ID and Client Secret are required');
+            throw new MaibMiaValidationError('Client ID and Client Secret are required');
         }
 
         const tokenData = { clientId, clientSecret };

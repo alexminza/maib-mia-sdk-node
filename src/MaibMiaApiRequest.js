@@ -4,6 +4,7 @@
  */
 
 const { API_ENDPOINTS, REQUIRED_PARAMS } = require('./constants');
+const { MaibMiaValidationError } = require('./errors');
 
 const MaibMiaSdk = require('./MaibMiaSdk');
 
@@ -69,7 +70,7 @@ class MaibMiaApiRequest {
      */
     static _validateIdParam(entityId) {
         if (!entityId) {
-            throw new Error('Invalid ID parameter. Should be string of 36 characters.');
+            throw new MaibMiaValidationError('Invalid ID parameter. Should be string of 36 characters.');
         }
     }
 
@@ -79,7 +80,7 @@ class MaibMiaApiRequest {
      */
     static _validateAccessToken(token) {
         if (!token) {
-            throw new Error('Access token is required');
+            throw new MaibMiaValidationError('Access token is required');
         }
     }
 
@@ -87,7 +88,7 @@ class MaibMiaApiRequest {
      * Validate required fields in an object
      * @param {Object} data - Data object to validate
      * @param {string[]} requiredParams - Array of required field names
-     * @throws {Error} - If any required field is missing
+     * @throws {MaibMiaValidationError} - If any required field is missing
      */
     static _validateParams(data, requiredParams) {
         if (!data || !requiredParams)
@@ -98,7 +99,7 @@ class MaibMiaApiRequest {
         );
 
         if (missingParams.length > 0) {
-            throw new Error(`Missing required parameters: ${missingParams.join(', ')}`);
+            throw new MaibMiaValidationError(`Missing required parameters: ${missingParams.join(', ')}`);
         }
     }
     //#endregion

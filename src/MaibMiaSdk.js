@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const axios = require('axios');
 
 const { SANDBOX_BASE_URL, DEFAULT_BASE_URL, DEFAULT_TIMEOUT } = require('./constants');
+const { MaibMiaApiError, MaibMiaValidationError } = require('./errors');
 
 class MaibMiaSdk {
     /**
@@ -140,21 +141,21 @@ class MaibMiaSdk {
      */
     static _handleResponse(response, endpoint) {
         if (!response.data)
-            throw new Error(`Invalid response received from server for endpoint ${endpoint}`);
+            throw new MaibMiaApiError(`Invalid response received from server for endpoint ${endpoint}`, response);
 
         if (response.data.ok) {
             if (response.data.result)
                 return response.data.result;
 
-            throw new Error(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field.`);
+            throw new MaibMiaApiError(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field.`, response);
         }
 
         if (response.data.errors) {
             const error = response.data.errors[0];
-            throw new Error(`Error sending request to endpoint ${endpoint}: ${error.errorMessage} (${error.errorCode})`);
+            throw new MaibMiaApiError(`Error sending request to endpoint ${endpoint}: ${error.errorMessage} (${error.errorCode})`, response);
         }
 
-        throw new Error(`Invalid response received from server for endpoint ${endpoint}: missing 'ok' and 'errors' fields`);
+        throw new MaibMiaApiError(`Invalid response received from server for endpoint ${endpoint}: missing 'ok' and 'errors' fields`, response);
     }
 
     /**
@@ -169,14 +170,14 @@ class MaibMiaSdk {
      */
     static validateCallbackSignature(callbackData, signatureKey) {
         if (!signatureKey) {
-            throw new Error('Invalid signature key');
+            throw new MaibMiaValidationError('Invalid signature key');
         }
 
         const callbackSignature = callbackData.signature || '';
         const callbackResult = callbackData.result || {};
 
         if (!callbackSignature || !callbackResult) {
-            throw new Error('Missing result or signature in callback data.');
+            throw new MaibMiaValidationError('Missing result or signature in callback data.');
         }
 
         const keys = {};
