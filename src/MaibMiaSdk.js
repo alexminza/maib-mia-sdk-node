@@ -146,7 +146,7 @@ class MaibMiaSdk {
             if (response.data.result)
                 return response.data.result;
 
-            throw new MaibMiaApiError(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field.`, response);
+            throw new MaibMiaApiError(`Invalid response received from server for endpoint ${endpoint}: missing 'result' field`, response);
         }
 
         if (response.data.errors) {
@@ -173,15 +173,12 @@ class MaibMiaSdk {
             throw new MaibMiaValidationError('Invalid signature key');
         }
 
-        const callbackSignature = callbackData.signature || '';
-        const callbackResult = callbackData.result || {};
-
-        if (!callbackSignature || !callbackResult) {
-            throw new MaibMiaValidationError('Missing result or signature in callback data.');
+        if (!callbackData?.signature || !callbackData?.result) {
+            throw new MaibMiaValidationError('Missing result or signature in callback data');
         }
 
-        const computedResultSignature = MaibMiaSdk.computeDataSignature(callbackResult, signatureKey);
-        return crypto.timingSafeEqual(Buffer.from(computedResultSignature), Buffer.from(callbackSignature));
+        const computedResultSignature = MaibMiaSdk.computeDataSignature(callbackData.result, signatureKey);
+        return crypto.timingSafeEqual(Buffer.from(computedResultSignature), Buffer.from(callbackData.signature));
     }
 
     static computeDataSignature(resultData, signatureKey) {
