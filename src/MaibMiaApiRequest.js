@@ -186,7 +186,7 @@ class MaibMiaApiRequest {
      * Retrieve List of QR Codes with Filtering Options
      * @param {Object} params - Retrieval params
      * @param {string} token - Access token
-     * @returns - Retrieval response
+     * @returns {Promise<Object>} - Retrieval response
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/information-retrieval-get/display-list-of-qr-codes-with-filtering-options
      */
     async qrList(params, token) {
