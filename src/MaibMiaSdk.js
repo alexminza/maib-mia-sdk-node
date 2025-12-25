@@ -180,10 +180,15 @@ class MaibMiaSdk {
             throw new MaibMiaValidationError('Missing result or signature in callback data.');
         }
 
+        const computedResultSignature = MaibMiaSdk.computeDataSignature(callbackResult, signatureKey);
+        return crypto.timingSafeEqual(Buffer.from(computedResultSignature), Buffer.from(callbackSignature));
+    }
+
+    static computeDataSignature(resultData, signatureKey) {
         const keys = {};
 
         // Collect and format values
-        for (const [key, value] of Object.entries(callbackResult)) {
+        for (const [key, value] of Object.entries(resultData)) {
             if (value === null || value === undefined) continue;
 
             let valueStr;
@@ -210,8 +215,7 @@ class MaibMiaSdk {
         // Hash and base64 encode
         const hash = crypto.createHash('sha256').update(hashInput, 'utf8').digest('base64');
 
-        // Compare with expected signature
-        return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(callbackSignature));
+        return hash;
     }
 }
 
