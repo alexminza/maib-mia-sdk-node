@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "node",
+            "request": "launch",
+            "name": "Debug npm test",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "test",
+                "--",
+                "${file}",
+                "--runInBand"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
             "name": "Run Current File",
             "request": "launch",
             "program": "${file}",

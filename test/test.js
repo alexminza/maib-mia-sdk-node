@@ -10,18 +10,43 @@ const MAIB_MIA_CLIENT_ID = process.env.MAIB_MIA_CLIENT_ID;
 const MAIB_MIA_CLIENT_SECRET = process.env.MAIB_MIA_CLIENT_SECRET;
 const MAIB_MIA_SIGNATURE_KEY = process.env.MAIB_MIA_SIGNATURE_KEY;
 
-async function testQrPayment() {
-    // Get Access Token with Client ID and Client Secret
+// Shared Context
+const context = {
+    token: null,
+    apiRequest: null,
+
+    // QR Flow Data
+    dynamicQrId: null,
+    hybridQrId: null,
+    qrPayId: null,
+    qrData: null,
+
+    // RTP Flow Data
+    rtpId: null,
+    rtpPayId: null,
+    rtpIdToCancel: null,
+    rtpData: null
+};
+
+//#region Authentication
+async function authenticate() {
+    console.log('Running: Authenticate');
     const maibMiaAuth = await MaibMiaAuthRequest
         .create(MaibMiaSdk.SANDBOX_BASE_URL)
         .generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
 
-    const maibMiaToken = maibMiaAuth.accessToken;
-    const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
+    context.token = maibMiaAuth.accessToken;
+    expect(context.token).toBeDefined();
 
-    // Create a dynamic order payment QR
+    context.apiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
+}
+//#endregion
+
+//#region QR
+async function createDynamicQr() {
+    console.log('Running: Create Dynamic QR');
     const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    const maibMiaQrData = {
+    context.qrData = {
         'type': 'Dynamic',
         'expiresAt': maibMiaExpiresAt,
         'amountType': 'Fixed',
@@ -33,11 +58,16 @@ async function testQrPayment() {
         'redirectUrl': 'https://example.com/success'
     };
 
-    const maibMiaQrCreateResponse = await maibMiaApiRequest.qrCreate(maibMiaQrData, maibMiaToken);
-    console.debug(maibMiaQrCreateResponse);
+    const response = await context.apiRequest.qrCreate(context.qrData, context.token);
+    console.debug('qrCreateResponse', response);
+    expect(response).toHaveProperty('qrId');
+    context.dynamicQrId = response['qrId'];
+}
 
-    // Create a hybrid QR
-    const maibMiaQrHybridData = {
+async function createHybridQr() {
+    console.log('Running: Create Hybrid QR');
+    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const hybridData = {
         'amountType': 'Fixed',
         'currency': 'MDL',
         'terminalId': 'P011111',
@@ -51,11 +81,16 @@ async function testQrPayment() {
         }
     };
 
-    const maibMiaQrCreateHybridResponse = await maibMiaApiRequest.qrCreateHybrid(maibMiaQrHybridData, maibMiaToken);
-    console.debug(maibMiaQrCreateHybridResponse);
+    const response = await context.apiRequest.qrCreateHybrid(hybridData, context.token);
+    console.debug('qrCreateHybridResponse', response);
+    expect(response).toHaveProperty('qrId');
+    context.hybridQrId = response['qrId'];
+}
 
-    // Create QR Extension
-    const maibMiaQrExtensionData = {
+async function createQrExtension() {
+    console.log('Running: Create QR Extension');
+    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const extensionData = {
         'expiresAt': maibMiaExpiresAt,
         'amount': 100.00,
         'description': 'Updated Order #456 description',
@@ -64,29 +99,37 @@ async function testQrPayment() {
         'redirectUrl': 'https://example.com/success'
     };
 
-    const qrHybridId = maibMiaQrCreateHybridResponse['qrId'];
-    const maibMiaQrCreateExtensionResponse = await maibMiaApiRequest.qrCreateExtension(qrHybridId, maibMiaQrExtensionData, maibMiaToken);
-    console.debug(maibMiaQrCreateExtensionResponse);
+    const response = await context.apiRequest.qrCreateExtension(context.hybridQrId, extensionData, context.token);
+    console.debug('qrCreateExtensionResponse', response);
+    expect(response).toBeDefined();
+}
 
-    const maibMiaQrCancelData = {
-        'reason': 'Test cancel reason'
-    };
+async function cancelQrExtension() {
+    console.log('Running: Cancel QR Extension');
+    const cancelData = { 'reason': 'Test cancel reason' };
+    const response = await context.apiRequest.qrCancelExtension(context.hybridQrId, cancelData, context.token);
+    console.debug('qrCancelExtensionResponse', response);
+    expect(response).toBeDefined();
+}
 
-    // Cancel Active QR Extension (Hybrid)
-    const maibMiaQrCancelExtensionResponse = await maibMiaApiRequest.qrCancelExtension(qrHybridId, maibMiaQrCancelData, maibMiaToken);
-    console.debug(maibMiaQrCancelExtensionResponse);
+async function cancelQr() {
+    console.log('Running: Cancel QR');
+    const cancelData = { 'reason': 'Test cancel reason' };
+    const response = await context.apiRequest.qrCancel(context.hybridQrId, cancelData, context.token);
+    console.debug('qrCancelResponse', response);
+    expect(response).toBeDefined();
+}
 
-    // Cancel Active QR (Static, Dynamic)
-    const maibMiaQrCancelResponse = await maibMiaApiRequest.qrCancel(qrHybridId, maibMiaQrCancelData, maibMiaToken);
-    console.debug(maibMiaQrCancelResponse);
+async function getQrDetails() {
+    console.log('Running: Get QR Details');
+    const response = await context.apiRequest.qrDetails(context.dynamicQrId, context.token);
+    console.debug('qrDetailsResponse', response);
+    expect(response).toBeDefined();
+}
 
-    // Get QR details
-    const qrId = maibMiaQrCreateResponse['qrId'];
-    const maibMiaQrDetailsResponse = await maibMiaApiRequest.qrDetails(qrId, maibMiaToken);
-    console.debug(maibMiaQrDetailsResponse);
-
-    //Display List of QR Codes
-    const maibMiaQrListParams = {
+async function listQrCodes() {
+    console.log('Running: List QR Codes');
+    const params = {
         'count': 10,
         'offset': 0,
         'amountFrom': 10.00,
@@ -95,59 +138,65 @@ async function testQrPayment() {
         'order': 'desc'
     };
 
-    const maibMiaQrListResponse = await maibMiaApiRequest.qrList(maibMiaQrListParams, maibMiaToken);
-    console.debug(maibMiaQrListResponse);
+    const response = await context.apiRequest.qrList(params, context.token);
+    console.debug('qrListResponse', response);
+    expect(response).toBeDefined();
+}
 
-    // Perform a test QR payment
-    const maibTestPayData = {
-        'qrId': qrId,
-        'amount': maibMiaQrData['amount'],
+async function performTestQrPayment() {
+    console.log('Running: Perform Test QR Payment');
+    const testPayData = {
+        'qrId': context.dynamicQrId,
+        'amount': context.qrData['amount'],
         'iban': 'MD88AG000000011621810140',
-        'currency': maibMiaQrData['currency'],
+        'currency': context.qrData['currency'],
         'payerName': 'TEST QR PAYMENT'
     };
 
-    const maibMiaTestPayResponse = await maibMiaApiRequest.testPay(maibTestPayData, maibMiaToken);
-    console.debug(maibMiaTestPayResponse);
+    const response = await context.apiRequest.testPay(testPayData, context.token);
+    console.debug('testPayResponse', response);
+    expect(response).toHaveProperty('payId');
+    context.qrPayId = response['payId'];
+}
+//#endregion
 
-    // Get payment details
-    const payId = maibMiaTestPayResponse['payId'];
-    const maibMiaPaymentDetailsResponse = await maibMiaApiRequest.paymentDetails(payId, maibMiaToken);
-    console.debug(maibMiaPaymentDetailsResponse);
+//#region Payment
+async function getPaymentDetails() {
+    console.log('Running: Get Payment Details');
+    const response = await context.apiRequest.paymentDetails(context.qrPayId, context.token);
+    console.debug('paymentDetailsResponse', response);
+    expect(response).toBeDefined();
+}
 
-    // Refund payment
-    const maibMiaPaymentRefundData = {
-        'reason': 'Test refund reason'
-    };
+async function refundPayment() {
+    console.log('Running: Refund Payment');
+    const refundData = { 'reason': 'Test refund reason' };
+    const response = await context.apiRequest.paymentRefund(context.qrPayId, refundData, context.token);
+    console.debug('paymentRefundResponse', response);
+    expect(response).toBeDefined();
+}
 
-    const maibMiaPaymentRefundResponse = await maibMiaApiRequest.paymentRefund(payId, maibMiaPaymentRefundData, maibMiaToken);
-    console.debug(maibMiaPaymentRefundResponse);
-
-    // Retrieve List of Payments
-    const maibMiaPaymentListParams = {
+async function listPayments() {
+    console.log('Running: List Payments');
+    const params = {
         'count': 10,
         'offset': 0,
-        'qrId': qrId,
+        'qrId': context.dynamicQrId,
         'sortBy': 'executedAt',
         'order': 'asc'
     };
 
-    const maibMiaPaymentListResponse = await maibMiaApiRequest.paymentList(maibMiaPaymentListParams, maibMiaToken);
-    console.debug(maibMiaPaymentListResponse);
+    const response = await context.apiRequest.paymentList(params, context.token);
+    console.debug('paymentListResponse', response);
+    expect(response).toBeDefined();
 }
+//#endregion
 
-async function testRtpPayment() {
-    // Get Access Token with Client ID and Client Secret
-    const maibMiaAuth = await MaibMiaAuthRequest
-        .create(MaibMiaSdk.SANDBOX_BASE_URL)
-        .generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
-
-    const maibMiaToken = maibMiaAuth.accessToken;
-    const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
-
+//#region RTP
+async function createRtpRequest() {
+    console.log('Running: Create RTP Request');
     const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-    const maibMiaRtpData = {
+    context.rtpData = {
         'alias': '37369112221',
         'amount': 150.00,
         'expiresAt': maibMiaExpiresAt,
@@ -159,56 +208,70 @@ async function testRtpPayment() {
         'redirectUrl': 'https://example.com/success'
     };
 
-    const maibMiaRtpCreateResponse = await maibMiaApiRequest.rtpCreate(maibMiaRtpData, maibMiaToken);
-    console.debug(maibMiaRtpCreateResponse);
+    const response = await context.apiRequest.rtpCreate(context.rtpData, context.token);
+    console.debug('rtpCreateResponse', response);
+    expect(response).toHaveProperty('rtpId');
+    context.rtpId = response['rtpId'];
+}
 
-    const rtpId = maibMiaRtpCreateResponse['rtpId'];
-    const maibMiaRtpStatusResponse = await maibMiaApiRequest.rtpStatus(rtpId, maibMiaToken);
-    console.debug(maibMiaRtpStatusResponse);
+async function getRtpStatus() {
+    console.log('Running: Get RTP Status');
+    const response = await context.apiRequest.rtpStatus(context.rtpId, context.token);
+    console.debug('rtpStatusResponse', response);
+    expect(response).toBeDefined();
+}
 
-    const maibMiaRtpListParams = {
+async function listRtpRequests() {
+    console.log('Running: List RTP Requests');
+    const params = {
         'count': 10,
         'offset': 0,
         'amount': 10.00,
         'sortBy': 'createdAt',
         'order': 'desc'
     };
-
-    const maibMiaRtpListResponse = await maibMiaApiRequest.rtpList(maibMiaRtpListParams, maibMiaToken);
-    console.debug(maibMiaRtpListResponse);
-
-    const maibMiaRtpRefundData = {
-        'reason': 'Test refund reason'
-    };
-
-    const maibMiaRtpTestAcceptData = {
-        'amount': 150.00,
-        'currency': 'MDL'
-    };
-
-    const maibMiaRtpTestAcceptResponse = await maibMiaApiRequest.rtpTestAccept(rtpId, maibMiaRtpTestAcceptData, maibMiaToken);
-    console.debug(maibMiaRtpTestAcceptResponse);
-
-    payId = maibMiaRtpTestAcceptResponse['payId']
-    const maibMiaRtpRefundResponse = await maibMiaApiRequest.rtpRefund(payId, maibMiaRtpRefundData, maibMiaToken);
-    console.debug(maibMiaRtpRefundResponse);
-
-    const maibMiaRtpCreate2Response = await maibMiaApiRequest.rtpCreate(maibMiaRtpData, maibMiaToken);
-    console.debug(maibMiaRtpCreate2Response);
-
-    const rtpId2 = maibMiaRtpCreate2Response['rtpId']
-    //const maibMiaRtpTestAccept2Response = await maibMiaApiRequest.rtpTestReject(rtpId2, maibMiaToken);
-    //console.debug(maibMiaRtpTestAccept2Response);
-
-    const maibMiaRtpCancelData = {
-        'reason': 'Test cancel reason'
-    };
-
-    const maibMiaRtpCancel2Response = await maibMiaApiRequest.rtpCancel(rtpId2, maibMiaRtpCancelData, maibMiaToken);
-    console.debug(maibMiaRtpCancel2Response);
+    const response = await context.apiRequest.rtpList(params, context.token);
+    console.debug('rtpListResponse', response);
+    expect(response).toBeDefined();
 }
 
-function testValidateCallbackSignature() {
+async function acceptRtpRequest() {
+    console.log('Running: Accept RTP Request');
+    const acceptData = { 'amount': 150.00, 'currency': 'MDL' };
+    const response = await context.apiRequest.rtpTestAccept(context.rtpId, acceptData, context.token);
+    console.debug('rtpTestAcceptResponse', response);
+    expect(response).toHaveProperty('payId');
+    context.rtpPayId = response['payId'];
+}
+
+async function refundRtpPayment() {
+    console.log('Running: Refund RTP Payment');
+    const refundData = { 'reason': 'Test refund reason' };
+    const response = await context.apiRequest.rtpRefund(context.rtpPayId, refundData, context.token);
+    console.debug('rtpRefundResponse', response);
+    expect(response).toBeDefined();
+}
+
+async function createRtpForCancel() {
+    console.log('Running: Create RTP Request for Cancellation');
+    const response = await context.apiRequest.rtpCreate(context.rtpData, context.token);
+    console.debug('rtpCreate2Response', response);
+    expect(response).toHaveProperty('rtpId');
+    context.rtpIdToCancel = response['rtpId'];
+}
+
+async function cancelRtpRequest() {
+    console.log('Running: Cancel RTP Request');
+    const cancelData = { 'reason': 'Test cancel reason' };
+    const response = await context.apiRequest.rtpCancel(context.rtpIdToCancel, cancelData, context.token);
+    console.debug('rtpCancel2Response', response);
+    expect(response).toBeDefined();
+}
+//#endregion
+
+//#region Callback
+async function validateCallbackSignature() {
+    console.log('Running: Validate Callback Signature');
     const callbackData = {
         'result': {
             'qrId': 'c3108b2f-6c2e-43a2-bdea-123456789012',
@@ -230,8 +293,40 @@ function testValidateCallbackSignature() {
 
     const validateCallbackResult = MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY);
     console.log('Validation Result:', validateCallbackResult);
+    expect(validateCallbackResult).toBe(true);
 }
+//#endregion
 
-testQrPayment();
-testRtpPayment();
-testValidateCallbackSignature();
+//#region Execution
+jest.setTimeout(60000);
+
+describe('MaibMiaSdk Integration Tests', () => {
+    beforeAll(authenticate);
+
+    describe('QR Payment Flow', () => {
+        test('Create Dynamic QR', createDynamicQr);
+        test('Create Hybrid QR', createHybridQr);
+        test('Create QR Extension', createQrExtension);
+        test('Cancel QR Extension', cancelQrExtension);
+        test('Cancel QR', cancelQr);
+        test('Get QR Details', getQrDetails);
+        test('List QR Codes', listQrCodes);
+        test('Perform Test QR Payment', performTestQrPayment);
+        test('Get Payment Details', getPaymentDetails);
+        test('Refund Payment', refundPayment);
+        test('List Payments', listPayments);
+    });
+
+    describe('RTP Payment Flow', () => {
+        test('Create RTP Request', createRtpRequest);
+        test('Get RTP Status', getRtpStatus);
+        test('List RTP Requests', listRtpRequests);
+        test('Accept RTP Request', acceptRtpRequest);
+        test('Refund RTP Payment', refundRtpPayment);
+        test('Create RTP for Cancellation', createRtpForCancel);
+        test('Cancel RTP Request', cancelRtpRequest);
+    });
+
+    test('Validate Callback Signature', validateCallbackSignature);
+});
+//#endregion
