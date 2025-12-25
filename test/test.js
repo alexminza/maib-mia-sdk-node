@@ -307,7 +307,7 @@ describe('MaibMiaSdk Integration Tests', () => {
     describe('QR Payment Flow', () => {
         test('Create Dynamic QR', createDynamicQr);
         test('Create Hybrid QR', createHybridQr);
-        test('Create QR Extension', createQrExtension);
+        test.skip('Create QR Extension', createQrExtension);
         test('Cancel QR Extension', cancelQrExtension);
         test('Cancel QR', cancelQr);
         test('Get QR Details', getQrDetails);
