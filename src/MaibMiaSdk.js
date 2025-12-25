@@ -64,7 +64,7 @@ class MaibMiaSdk {
             'url': config ? axios.getUri(config) : undefined,
             'data': object?.data,
             'params': config?.params,
-            'headers': object?.headers?.toJSON?.() || config?.headers?.toJSON?.(),
+            // 'headers': object?.headers?.toJSON?.() || config?.headers?.toJSON?.(),
             'status': object?.status
         }
 
