@@ -53,7 +53,7 @@ class MaibMiaSdk {
             (error) => {
                 const config = error.response?.config || error.config;
                 const logData = MaibMiaSdk._getLogData(error.response, config);
-                console.error(`${packageName} Error: ${logData.status} ${logData.data}`, logData, error);
+                console.error(`${packageName} Error: ${logData.status ?? ''} ${logData.data ?? ''}`, logData, error);
                 return Promise.reject(error);
             }
         );
