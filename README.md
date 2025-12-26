@@ -20,7 +20,6 @@ Import SDK:
 ```javascript
 const {
     MaibMiaSdk,
-    MaibMiaAuthRequest,
     MaibMiaApiRequest
 } = require('maib-mia-sdk');
 ```
@@ -37,10 +36,8 @@ const MAIB_MIA_SIGNATURE_KEY = process.env.MAIB_MIA_SIGNATURE_KEY;
 ### Get Access Token with Client ID and Client Secret
 
 ```javascript
-const maibMiaAuth = await MaibMiaAuthRequest
-    .create(MaibMiaSdk.SANDBOX_BASE_URL)
-    .generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
-
+const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
+const maibMiaAuth = await maibMiaApiRequest.generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
 const maibMiaToken = maibMiaAuth.accessToken;
 ```
 
@@ -60,7 +57,6 @@ const maibMiaQrData = {
     'redirectUrl': 'https://example.com/success'
 };
 
-const maibMiaApiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
 const maibMiaQrCreateResponse = await maibMiaApiRequest.qrCreate(maibMiaQrData, maibMiaToken);
 ```
 

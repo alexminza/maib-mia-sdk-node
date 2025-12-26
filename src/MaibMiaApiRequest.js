@@ -30,6 +30,25 @@ class MaibMiaApiRequest {
     }
     //#endregion
 
+    //#region Auth
+    /**
+     * Obtain Authentication Token
+     * @param {string} clientId - Client ID
+     * @param {string} clientSecret - Client secret
+     * @returns {Promise<Object>} - Token response object
+     * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/authentication/obtain-authentication-token
+     * @throws {MaibMiaValidationError} - If Client ID or Client secret are invalid
+     */
+    async generateToken(clientId, clientSecret) {
+        if (!clientId || !clientSecret) {
+            throw new MaibMiaValidationError('Client ID and Client Secret are required');
+        }
+
+        const tokenData = { clientId, clientSecret };
+        return this.client._sendRequest('POST', API_ENDPOINTS.AUTH_TOKEN, tokenData);
+    }
+    //#endregion
+
     //#region Operation
     /**
      * Perform API request
