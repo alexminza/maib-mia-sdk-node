@@ -152,8 +152,8 @@ async function performTestQrPayment() {
     const testPayData = {
         'qrId': context.dynamicQrId,
         'amount': context.qrData.amount,
-        'iban': 'MD88AG000000011621810140',
         'currency': context.qrData.currency,
+        'iban': 'MD88AG000000011621810140',
         'payerName': 'TEST QR PAYMENT'
     };
 

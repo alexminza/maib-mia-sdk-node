@@ -218,7 +218,7 @@ class MaibMiaApiRequest {
     }
     //#endregion
 
-    //#region  Payment
+    //#region Payment
     /**
      * Payment Simulation (Sandbox)
      * @param {Object} data - Test payment data
