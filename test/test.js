@@ -295,10 +295,10 @@ async function validateCallbackSignature() {
         'signature': 'fHM+l4L1ycFWZDRTh/Vr8oybq1Q1xySdjyvmFQCmZ4s='
     };
 
+    expect(MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY)).toBe(false);
+
     callbackData.signature = MaibMiaSdk.computeDataSignature(callbackData.result, MAIB_MIA_SIGNATURE_KEY);
-    const validateCallbackResult = MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY);
-    console.log('Validation Result:', validateCallbackResult);
-    expect(validateCallbackResult).toBe(true);
+    expect(MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY)).toBe(true);
 }
 //#endregion
 
