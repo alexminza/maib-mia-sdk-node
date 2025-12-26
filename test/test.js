@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const {
     MaibMiaSdk,
-    MaibMiaAuthRequest,
     MaibMiaApiRequest
 } = require('../src');
 
@@ -38,15 +37,12 @@ function checkInit() {
 
 async function authenticate() {
     console.log('Running: Authenticate');
-    const maibMiaAuth = await MaibMiaAuthRequest
-        .create(MaibMiaSdk.SANDBOX_BASE_URL)
-        .generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
-
-    expect(maibMiaAuth).toHaveProperty('accessToken')
-    context.accessToken = maibMiaAuth.accessToken;
-    expect(context.accessToken).toBeTruthy();
-
     context.apiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
+
+    const response = await context.apiRequest.generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
+    expect(response).toHaveProperty('accessToken')
+    context.accessToken = response.accessToken;
+    expect(context.accessToken).toBeTruthy();
 }
 //#endregion
 
