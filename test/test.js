@@ -38,6 +38,7 @@ function checkInit() {
 async function authenticate() {
     console.log('Running: Authenticate');
     context.apiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
+    //context.apiRequest.client.setupLogging();
 
     const response = await context.apiRequest.generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
     expect(response).toHaveProperty('accessToken')
