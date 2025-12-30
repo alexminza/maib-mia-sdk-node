@@ -34,7 +34,9 @@ const API_ENDPOINTS = {
     MIA_RTP_CANCEL: 'rtp/:rtpId/cancel',
     MIA_RTP_REFUND: 'rtp/:payId/refund',
     MIA_RTP_TEST_ACCEPT: 'rtp/:rtpId/test-accept',
-    MIA_RTP_TEST_REJECT: 'rtp/:rtpId/test-reject'
+    MIA_RTP_TEST_REJECT: 'rtp/:rtpId/test-reject',
+
+    PAYMENTS_REFUND: 'payments/:payId/refund',
 };
 
 const REQUIRED_PARAMS = {

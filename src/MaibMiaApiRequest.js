@@ -251,7 +251,7 @@ class MaibMiaApiRequest {
      * @link https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-refund/refund-completed-payment
      */
     async paymentRefund(payId, data, token) {
-        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.MIA_PAYMENTS_REFUND, { payId });
+        const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.PAYMENTS_REFUND, { payId });
         return this._executeOperation(endpoint, token, data);
     }
 
