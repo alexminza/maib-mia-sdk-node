@@ -136,8 +136,8 @@ const maibMiaPaymentDetailsResponse = await maibMiaApiRequest.paymentDetails(pay
 ```javascript
 const maibMiaPaymentRefundData = {
     'reason': 'Test refund reason',
-    // 'amount' => 25.00, // Optional: for partial refund
-    // 'callbackUrl' => 'https://example.com/refund' // Optional
+    // 'amount': 25.00, // Optional: for partial refund
+    // 'callbackUrl': 'https://example.com/refund' // Optional
 };
 
 const maibMiaPaymentRefundResponse = await maibMiaApiRequest.paymentRefund(payId, maibMiaPaymentRefundData, maibMiaToken);
