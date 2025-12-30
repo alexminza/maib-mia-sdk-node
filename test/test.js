@@ -44,7 +44,7 @@ function assertResultOk(response) {
 }
 
 //#region Authentication
-async function authenticate() {
+async function testAuthenticate() {
     console.log('Running: authenticate');
 
     context.apiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
@@ -416,7 +416,7 @@ jest.setTimeout(60000);
 
 describe('MaibMiaSdk Integration Tests', () => {
     beforeAll(init);
-    beforeAll(authenticate);
+    beforeAll(testAuthenticate);
 
     describe('QR Payment Flow', () => {
         test('testQrCreateDynamic', testQrCreateDynamic);
