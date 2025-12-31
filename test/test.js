@@ -14,45 +14,59 @@ const context = {
     accessToken: null,
     apiRequest: null,
 
+    expiresAt: null,
+
     // QR Flow Data
     dynamicQrId: null,
     hybridQrId: null,
+    hybridQrExtensionId: null,
     qrPayId: null,
     qrData: null,
 
     // RTP Flow Data
     rtpId: null,
     rtpPayId: null,
-    rtpIdToCancel: null,
     rtpData: null
 };
 
-//#region Authentication
-function checkInit() {
-    console.log('Running: Check Init');
+function init() {
+    console.log('Running: init');
+
     expect(MAIB_MIA_CLIENT_ID).toBeTruthy();
     expect(MAIB_MIA_CLIENT_SECRET).toBeTruthy();
     expect(MAIB_MIA_SIGNATURE_KEY).toBeTruthy();
+
+    context.expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 }
 
-async function authenticate() {
-    console.log('Running: Authenticate');
+function assertResultOk(response) {
+    expect(response).toBeDefined();
+}
+
+//#region Authentication
+async function testAuthenticate() {
+    console.log('Running: authenticate');
+
     context.apiRequest = MaibMiaApiRequest.create(MaibMiaSdk.SANDBOX_BASE_URL);
+    //context.apiRequest.client.setupLogging();
 
     const response = await context.apiRequest.generateToken(MAIB_MIA_CLIENT_ID, MAIB_MIA_CLIENT_SECRET);
+
+    assertResultOk(response);
     expect(response).toHaveProperty('accessToken')
+    expect(response.accessToken).toBeTruthy();
+
     context.accessToken = response.accessToken;
-    expect(context.accessToken).toBeTruthy();
 }
 //#endregion
 
 //#region QR
-async function createDynamicQr() {
-    console.log('Running: Create Dynamic QR');
-    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+async function testQrCreateDynamic() {
+    console.log('Running: testQrCreateDynamic');
+
     context.qrData = {
         'type': 'Dynamic',
-        'expiresAt': maibMiaExpiresAt,
+        'expiresAt': context.expiresAt,
         'amountType': 'Fixed',
         'amount': 50.00,
         'currency': 'MDL',
@@ -63,20 +77,24 @@ async function createDynamicQr() {
     };
 
     const response = await context.apiRequest.qrCreate(context.qrData, context.accessToken);
-    console.debug('qrCreateResponse', response);
+    console.debug('qrCreate', response);
+
+    assertResultOk(response);
     expect(response).toHaveProperty('qrId');
+    expect(response.qrId).toBeTruthy();
+
     context.dynamicQrId = response.qrId;
 }
 
-async function createHybridQr() {
-    console.log('Running: Create Hybrid QR');
-    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    const hybridData = {
+async function testQrCreateHybrid() {
+    console.log('Running: testQrCreateHybrid');
+
+    context.hybridData = {
         'amountType': 'Fixed',
         'currency': 'MDL',
         'terminalId': 'P011111',
         'extension': {
-            'expiresAt': maibMiaExpiresAt,
+            'expiresAt': context.expiresAt,
             'amount': 50.00,
             'description': 'Order #123',
             'orderId': '123',
@@ -85,17 +103,22 @@ async function createHybridQr() {
         }
     };
 
-    const response = await context.apiRequest.qrCreateHybrid(hybridData, context.accessToken);
-    console.debug('qrCreateHybridResponse', response);
+    const response = await context.apiRequest.qrCreateHybrid(context.hybridData, context.accessToken);
+    console.debug('qrCreateHybrid', response);
+
+    assertResultOk(response);
     expect(response).toHaveProperty('qrId');
+    expect(response.qrId).toBeTruthy();
+
     context.hybridQrId = response.qrId;
+    context.hybridQrExtensionId = response.extensionId;
 }
 
-async function createQrExtension() {
-    console.log('Running: Create QR Extension');
-    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+async function testQrCreateExtension() {
+    console.log('Running: testQrCreateExtension');
+
     const extensionData = {
-        'expiresAt': maibMiaExpiresAt,
+        'expiresAt': context.expiresAt,
         'amount': 100.00,
         'description': 'Updated Order #456 description',
         'orderId': '456',
@@ -104,36 +127,51 @@ async function createQrExtension() {
     };
 
     const response = await context.apiRequest.qrCreateExtension(context.hybridQrId, extensionData, context.accessToken);
-    console.debug('qrCreateExtensionResponse', response);
-    expect(response).toBeDefined();
+    console.debug('qrCreateExtension', response);
+
+    assertResultOk(response);
 }
 
-async function cancelQrExtension() {
-    console.log('Running: Cancel QR Extension');
-    const cancelData = { 'reason': 'Test cancel reason' };
-    const response = await context.apiRequest.qrCancelExtension(context.hybridQrId, cancelData, context.accessToken);
-    console.debug('qrCancelExtensionResponse', response);
-    expect(response).toBeDefined();
-}
+async function testQrCancel() {
+    console.log('Running: testQrCancel');
 
-async function cancelQr() {
-    console.log('Running: Cancel QR');
-    const cancelData = { 'reason': 'Test cancel reason' };
+    const cancelData = { 'reason': 'testQrCancel reason' };
     const response = await context.apiRequest.qrCancel(context.hybridQrId, cancelData, context.accessToken);
-    console.debug('qrCancelResponse', response);
-    expect(response).toBeDefined();
+    console.debug('qrCancel', response);
+
+    assertResultOk(response);
+    expect(response.qrId).toEqual(context.hybridQrId);
+    expect(response.status).toEqual('Cancelled');
 }
 
-async function getQrDetails() {
-    console.log('Running: Get QR Details');
+async function testQrCancelExtension() {
+    console.log('Running: testQrCancelExtension');
+
+    const cancelData = { 'reason': 'testQrCancelExtension reason' };
+    const response = await context.apiRequest.qrCancelExtension(context.hybridQrId, cancelData, context.accessToken);
+    console.debug('qrCancelExtension', response);
+
+    assertResultOk(response);
+    expect(response.extensionId).toEqual(context.hybridQrExtensionId);
+}
+
+async function testQrDetails() {
+    console.log('Running: testQrDetails');
+
     const response = await context.apiRequest.qrDetails(context.dynamicQrId, context.accessToken);
-    console.debug('qrDetailsResponse', response);
-    expect(response).toBeDefined();
+    console.debug('qrDetails', response);
+
+    assertResultOk(response);
+    expect(response.qrId).toEqual(context.dynamicQrId);
+    expect(response.status).toEqual('Active');
+    expect(response.amount).toEqual(context.qrData.amount);
+    expect(response.currency).toEqual(context.qrData.currency);
 }
 
-async function listQrCodes() {
-    console.log('Running: List QR Codes');
-    const params = {
+async function testQrList() {
+    console.log('Running: testQrList');
+
+    const qrListParams = {
         'count': 10,
         'offset': 0,
         'amountFrom': 10.00,
@@ -142,46 +180,91 @@ async function listQrCodes() {
         'order': 'desc'
     };
 
-    const response = await context.apiRequest.qrList(params, context.accessToken);
-    console.debug('qrListResponse', response);
-    expect(response).toBeDefined();
+    const response = await context.apiRequest.qrList(qrListParams, context.accessToken);
+    console.debug('qrList', response);
+
+    assertResultOk(response);
+    expect(response).toHaveProperty('items');
+    expect(response).toHaveProperty('totalCount');
+    expect(response.items).toBeTruthy();
+    expect(response.totalCount).toBeTruthy();
 }
 
-async function performTestQrPayment() {
-    console.log('Running: Perform Test QR Payment');
+async function testPay() {
+    console.log('Running: testPay');
+
     const testPayData = {
         'qrId': context.dynamicQrId,
         'amount': context.qrData.amount,
-        'iban': 'MD88AG000000011621810140',
         'currency': context.qrData.currency,
+        'iban': 'MD88AG000000011621810140',
         'payerName': 'TEST QR PAYMENT'
     };
 
     const response = await context.apiRequest.testPay(testPayData, context.accessToken);
-    console.debug('testPayResponse', response);
-    expect(response).toHaveProperty('payId');
+    console.debug('testPay', response);
+
+    assertResultOk(response);
+    expect(response.qrId).toEqual(context.dynamicQrId);
+    expect(response.qrStatus).toEqual('Paid');
+    expect(response.amount).toEqual(context.qrData.amount);
+    expect(response.currency).toEqual(context.qrData.currency);
+    expect(response.payId).toBeTruthy();
+
     context.qrPayId = response.payId;
 }
 //#endregion
 
 //#region Payment
-async function getPaymentDetails() {
-    console.log('Running: Get Payment Details');
+async function testPaymentDetails() {
+    console.log('Running: testPaymentDetails');
+
     const response = await context.apiRequest.paymentDetails(context.qrPayId, context.accessToken);
-    console.debug('paymentDetailsResponse', response);
-    expect(response).toBeDefined();
+    console.debug('paymentDetails', response);
+
+    assertResultOk(response);
+    expect(response.payId).toEqual(context.qrPayId);
+    expect(response.status).toEqual('Executed');
+    expect(response.amount).toEqual(context.qrData.amount);
+    expect(response.currency).toEqual(context.qrData.currency);
 }
 
-async function refundPayment() {
-    console.log('Running: Refund Payment');
-    const refundData = { 'reason': 'Test refund reason' };
+async function testPaymentRefundPartial() {
+    console.log('Running: testPaymentRefundPartial');
+
+    const refundData = {
+        'amount': context.qrData.amount / 2,
+        'reason': 'Test refund reason',
+        'callbackUrl': 'https://example.com/refund'
+    };
+
     const response = await context.apiRequest.paymentRefund(context.qrPayId, refundData, context.accessToken);
-    console.debug('paymentRefundResponse', response);
-    expect(response).toBeDefined();
+    console.debug('paymentRefund', response);
+
+    assertResultOk(response);
+    expect(response.refundId).toBeTruthy();
+    expect(response.status).toEqual('Created');
 }
 
-async function listPayments() {
-    console.log('Running: List Payments');
+async function testPaymentRefundFull() {
+    console.log('Running: testPaymentRefundFull');
+
+    const refundData = {
+        'reason': 'Test refund reason',
+        'callbackUrl': 'https://example.com/refund'
+    };
+
+    const response = await context.apiRequest.paymentRefund(context.qrPayId, refundData, context.accessToken);
+    console.debug('paymentRefund', response);
+
+    assertResultOk(response);
+    expect(response.refundId).toBeTruthy();
+    expect(response.status).toEqual('Created');
+}
+
+async function testPaymentList() {
+    console.log('Running: testPaymentList');
+
     const params = {
         'count': 10,
         'offset': 0,
@@ -191,19 +274,22 @@ async function listPayments() {
     };
 
     const response = await context.apiRequest.paymentList(params, context.accessToken);
-    console.debug('paymentListResponse', response);
-    expect(response).toBeDefined();
+    console.debug('paymentList', response);
+
+    assertResultOk(response);
+    expect(response).toHaveProperty('items');
+    expect(response).toHaveProperty('totalCount');
 }
 //#endregion
 
 //#region RTP
-async function createRtpRequest() {
-    console.log('Running: Create RTP Request');
-    const maibMiaExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+async function testRtpCreate() {
+    console.log('Running: testRtpCreate');
+
     context.rtpData = {
         'alias': '37369112221',
         'amount': 150.00,
-        'expiresAt': maibMiaExpiresAt,
+        'expiresAt': context.expiresAt,
         'currency': 'MDL',
         'description': 'Invoice #123',
         'orderId': '123',
@@ -213,20 +299,26 @@ async function createRtpRequest() {
     };
 
     const response = await context.apiRequest.rtpCreate(context.rtpData, context.accessToken);
-    console.debug('rtpCreateResponse', response);
-    expect(response).toHaveProperty('rtpId');
+    console.debug('rtpCreate', response);
+
+    assertResultOk(response);
+    expect(response.rtpId).toBeTruthy();
+
     context.rtpId = response.rtpId;
 }
 
-async function getRtpStatus() {
-    console.log('Running: Get RTP Status');
+async function testRtpStatus() {
+    console.log('Running: testRtpStatus');
+
     const response = await context.apiRequest.rtpStatus(context.rtpId, context.accessToken);
-    console.debug('rtpStatusResponse', response);
-    expect(response).toBeDefined();
+    console.debug('rtpStatus', response);
+
+    assertResultOk(response);
+    expect(response.rtpId).toEqual(context.rtpId);
 }
 
-async function listRtpRequests() {
-    console.log('Running: List RTP Requests');
+async function testRtpList() {
+    console.log('Running: testRtpList');
     const params = {
         'count': 10,
         'offset': 0,
@@ -235,47 +327,64 @@ async function listRtpRequests() {
         'order': 'desc'
     };
     const response = await context.apiRequest.rtpList(params, context.accessToken);
-    console.debug('rtpListResponse', response);
-    expect(response).toBeDefined();
+    console.debug('rtpList', response);
+
+    assertResultOk(response);
+    expect(response).toHaveProperty('items');
+    expect(response).toHaveProperty('totalCount');
 }
 
-async function acceptRtpRequest() {
-    console.log('Running: Accept RTP Request');
-    const acceptData = { 'amount': 150.00, 'currency': 'MDL' };
+async function testRtpTestAccept() {
+    console.log('Running: testRtpTestAccept');
+
+    const acceptData = {
+        'amount': context.rtpData.amount,
+        'currency': context.rtpData.currency
+    };
+
     const response = await context.apiRequest.rtpTestAccept(context.rtpId, acceptData, context.accessToken);
-    console.debug('rtpTestAcceptResponse', response);
-    expect(response).toHaveProperty('payId');
+    console.debug('rtpTestAccept', response);
+
+    assertResultOk(response);
+    expect(response.payId).toBeTruthy();
+
     context.rtpPayId = response.payId;
 }
 
-async function refundRtpPayment() {
-    console.log('Running: Refund RTP Payment');
-    const refundData = { 'reason': 'Test refund reason' };
+async function testRtpRefund() {
+    console.log('Running: testRtpRefund');
+
+    const refundData = { 'reason': 'testRtpRefund reason' };
     const response = await context.apiRequest.rtpRefund(context.rtpPayId, refundData, context.accessToken);
-    console.debug('rtpRefundResponse', response);
-    expect(response).toBeDefined();
+    console.debug('rtpRefund', response);
+
+    assertResultOk(response);
+    expect(response.refundId).toBeTruthy();
+    expect(response.status).toEqual('Created');
 }
 
-async function createRtpForCancel() {
-    console.log('Running: Create RTP Request for Cancellation');
-    const response = await context.apiRequest.rtpCreate(context.rtpData, context.accessToken);
-    console.debug('rtpCreate2Response', response);
-    expect(response).toHaveProperty('rtpId');
-    context.rtpIdToCancel = response.rtpId;
-}
+async function testRtpCancel() {
+    console.log('Running: testRtpCancel');
 
-async function cancelRtpRequest() {
-    console.log('Running: Cancel RTP Request');
-    const cancelData = { 'reason': 'Test cancel reason' };
-    const response = await context.apiRequest.rtpCancel(context.rtpIdToCancel, cancelData, context.accessToken);
-    console.debug('rtpCancel2Response', response);
-    expect(response).toBeDefined();
+    const rtpToCancelResponse = await context.apiRequest.rtpCreate(context.rtpData, context.accessToken);
+    console.debug('rtpCreate', rtpToCancelResponse);
+
+    const rtpIdToCancel = rtpToCancelResponse.rtpId;
+    const cancelData = { 'reason': 'testRtpCancel reason' };
+
+    const response = await context.apiRequest.rtpCancel(rtpIdToCancel, cancelData, context.accessToken);
+    console.debug('rtpCancel', response);
+
+    assertResultOk(response);
+    expect(response.rtpId).toEqual(rtpIdToCancel);
+    expect(response.status).toEqual('Cancelled');
 }
 //#endregion
 
 //#region Callback
-async function validateCallbackSignature() {
-    console.log('Running: Validate Callback Signature');
+async function testValidateCallbackSignature() {
+    console.log('Running: testValidateCallbackSignature');
+
     const callbackData = {
         'result': {
             'qrId': 'c3108b2f-6c2e-43a2-bdea-123456789012',
@@ -295,10 +404,10 @@ async function validateCallbackSignature() {
         'signature': 'fHM+l4L1ycFWZDRTh/Vr8oybq1Q1xySdjyvmFQCmZ4s='
     };
 
+    expect(MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY)).toEqual(false);
+
     callbackData.signature = MaibMiaSdk.computeDataSignature(callbackData.result, MAIB_MIA_SIGNATURE_KEY);
-    const validateCallbackResult = MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY);
-    console.log('Validation Result:', validateCallbackResult);
-    expect(validateCallbackResult).toBe(true);
+    expect(MaibMiaSdk.validateCallbackSignature(callbackData, MAIB_MIA_SIGNATURE_KEY)).toEqual(true);
 }
 //#endregion
 
@@ -306,33 +415,33 @@ async function validateCallbackSignature() {
 jest.setTimeout(60000);
 
 describe('MaibMiaSdk Integration Tests', () => {
-    beforeAll(checkInit);
-    beforeAll(authenticate);
+    beforeAll(init);
+    beforeAll(testAuthenticate);
 
     describe('QR Payment Flow', () => {
-        test('Create Dynamic QR', createDynamicQr);
-        test('Create Hybrid QR', createHybridQr);
-        test.skip('Create QR Extension', createQrExtension);
-        test('Cancel QR Extension', cancelQrExtension);
-        test('Cancel QR', cancelQr);
-        test('Get QR Details', getQrDetails);
-        test('List QR Codes', listQrCodes);
-        test('Perform Test QR Payment', performTestQrPayment);
-        test('Get Payment Details', getPaymentDetails);
-        test('Refund Payment', refundPayment);
-        test('List Payments', listPayments);
+        test('testQrCreateDynamic', testQrCreateDynamic);
+        test('testQrCreateHybrid', testQrCreateHybrid);
+        test.skip('testQrCreateExtension', testQrCreateExtension);
+        test('testQrCancelExtension', testQrCancelExtension);
+        test('testQrCancel', testQrCancel);
+        test('testQrDetails', testQrDetails);
+        test('testQrList', testQrList);
+        test('testPay', testPay);
+        test('testPaymentDetails', testPaymentDetails);
+        test('testPaymentRefundPartial', testPaymentRefundPartial);
+        test('testPaymentRefundFull', testPaymentRefundFull);
+        test('testPaymentList', testPaymentList);
     });
 
     describe('RTP Payment Flow', () => {
-        test('Create RTP Request', createRtpRequest);
-        test('Get RTP Status', getRtpStatus);
-        test('List RTP Requests', listRtpRequests);
-        test('Accept RTP Request', acceptRtpRequest);
-        test('Refund RTP Payment', refundRtpPayment);
-        test('Create RTP for Cancellation', createRtpForCancel);
-        test('Cancel RTP Request', cancelRtpRequest);
+        test('testRtpCreate', testRtpCreate);
+        test('testRtpStatus', testRtpStatus);
+        test('testRtpList', testRtpList);
+        test('testRtpTestAccept', testRtpTestAccept);
+        test('testRtpRefund', testRtpRefund);
+        test('testRtpCancel', testRtpCancel);
     });
 
-    test('Validate Callback Signature', validateCallbackSignature);
+    test('testValidateCallbackSignature', testValidateCallbackSignature);
 });
 //#endregion

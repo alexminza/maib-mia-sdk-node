@@ -3,7 +3,7 @@
 ![maib MIA](https://repository-images.githubusercontent.com/1122147023/29a661ec-62fc-4944-8518-569566fd0ef1)
 
 * maib MIA QR API docs: https://docs.maibmerchants.md/mia-qr-api
-* maib Request to Pay (RTP) docs: https://docs.maibmerchants.md/request-to-pay
+* maib Request to Pay (RTP) API docs: https://docs.maibmerchants.md/request-to-pay
 * GitHub project https://github.com/alexminza/maib-mia-sdk-node
 * NPM package https://www.npmjs.com/package/maib-mia-sdk
 
@@ -135,7 +135,9 @@ const maibMiaPaymentDetailsResponse = await maibMiaApiRequest.paymentDetails(pay
 
 ```javascript
 const maibMiaPaymentRefundData = {
-    'reason': 'Test refund reason'
+    'reason': 'Test refund reason',
+    // 'amount': 25.00, // Optional: for partial refund
+    // 'callbackUrl': 'https://example.com/refund' // Optional
 };
 
 const maibMiaPaymentRefundResponse = await maibMiaApiRequest.paymentRefund(payId, maibMiaPaymentRefundData, maibMiaToken);
