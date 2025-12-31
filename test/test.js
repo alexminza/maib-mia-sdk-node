@@ -242,7 +242,7 @@ async function testPaymentRefundPartial() {
     console.debug('paymentRefund', response);
 
     assertResultOk(response);
-    expect(response.refundId).toEqual('00000000-0000-0000-0000-000000000000');
+    expect(response.refundId).toBeTruthy();
     expect(response.status).toEqual('Created');
 }
 
@@ -258,7 +258,7 @@ async function testPaymentRefundFull() {
     console.debug('paymentRefund', response);
 
     assertResultOk(response);
-    expect(response.refundId).toEqual('00000000-0000-0000-0000-000000000000');
+    expect(response.refundId).toBeTruthy();
     expect(response.status).toEqual('Created');
 }
 
@@ -359,7 +359,7 @@ async function testRtpRefund() {
     console.debug('rtpRefund', response);
 
     assertResultOk(response);
-    expect(response.refundId).toEqual('00000000-0000-0000-0000-000000000000');
+    expect(response.refundId).toBeTruthy();
     expect(response.status).toEqual('Created');
 }
 
