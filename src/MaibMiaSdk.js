@@ -30,15 +30,15 @@ class MaibMiaSdk {
         });
     }
 
-    setupLogging() {
+    setupLogging(logger = console) {
         this.client.interceptors.request.use(
             (config) => {
                 const logData = MaibMiaSdk._getLogData(config, config);
-                console.debug(`${packageName} Request: ${logData.method} ${logData.url}`, logData);
+                logger.debug(`${packageName} Request: ${logData.method} ${logData.url}`, logData);
                 return config;
             },
             (error) => {
-                console.error(`${packageName} Request: ${error.message}`, error);
+                logger.error(`${packageName} Request: ${error.message}`, error);
                 return Promise.reject(error);
             }
         );
@@ -46,13 +46,13 @@ class MaibMiaSdk {
         this.client.interceptors.response.use(
             (response) => {
                 const logData = MaibMiaSdk._getLogData(response, response?.config);
-                console.debug(`${packageName} Response: ${logData.status} ${logData.method} ${logData.url}`, logData);
+                logger.debug(`${packageName} Response: ${logData.status} ${logData.method} ${logData.url}`, logData);
                 return response;
             },
             (error) => {
                 const config = error.response?.config || error.config;
                 const logData = MaibMiaSdk._getLogData(error.response, config);
-                console.error(`${packageName} Error: ${logData.status ?? ''} ${logData.data ?? ''}`, logData, error);
+                logger.error(`${packageName} Error: ${logData.status ?? ''} ${logData.data ?? ''}`, logData, error);
                 return Promise.reject(error);
             }
         );
