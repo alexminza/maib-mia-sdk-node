@@ -59,7 +59,7 @@ class MaibMiaApiRequest {
      * @param {string} method - Request HTTP method
      * @param {Object} params - Request params
      */
-    async _executeOperation(endpoint, authToken, data=null, requiredParams=null, method='POST', params=null) {
+    async _executeOperation(endpoint, authToken, data = null, requiredParams = null, method = 'POST', params = null) {
         MaibMiaApiRequest._validateAccessToken(authToken);
         MaibMiaApiRequest._validateParams(data, requiredParams);
 
