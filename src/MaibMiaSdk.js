@@ -210,9 +210,7 @@ class MaibMiaSdk {
         const hashInput = `${additionalString}:${signatureKey}`;
 
         // Hash and base64 encode
-        const hash = crypto.createHash('sha256').update(hashInput, 'utf8').digest('base64');
-
-        return hash;
+        return crypto.createHash('sha256').update(hashInput, 'utf8').digest('base64');
     }
 }
 
