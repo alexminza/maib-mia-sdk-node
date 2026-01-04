@@ -121,7 +121,7 @@ class MaibMiaApiRequest {
         }
 
         const missingParams = requiredParams.filter(field =>
-            data[field] === undefined || data[field] === null
+            data[field] == null
         );
 
         if (missingParams.length > 0) {
