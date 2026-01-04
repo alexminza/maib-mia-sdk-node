@@ -252,7 +252,7 @@ class MaibMiaApiRequest {
      */
     async paymentRefund(payId, data, authToken) {
         const endpoint = MaibMiaApiRequest._buildEndpoint(API_ENDPOINTS.PAYMENTS_REFUND, { payId });
-        return this._executeOperation(endpoint, authToken, data);
+        return this._executeOperation(endpoint, authToken, data, REQUIRED_PARAMS.PAYMENTS_REFUND_PARAMS);
     }
 
     /**
