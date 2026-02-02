@@ -48,6 +48,8 @@ const REQUIRED_PARAMS = {
     QR_EXTENSION_PARAMS: ['expiresAt', 'description'],
     // https://docs.maibmerchants.md/mia-qr-api/en/payment-simulation-sandbox#request-parameters-body-json
     TEST_PAY_PARAMS: ['qrId', 'amount', 'iban', 'currency', 'payerName'],
+    // https://docs.maibmerchants.md/mia-qr-api/en/endpoints/payment-refund/refund-completed-payment
+    PAYMENTS_REFUND_PARAMS: ['reason'],
     // https://docs.maibmerchants.md/request-to-pay/api-reference/endpoints/create-a-new-payment-request-rtp#request-body-parameters
     RTP_PARAMS: ['alias', 'amount', 'currency', 'expiresAt', 'description'],
     // https://docs.maibmerchants.md/request-to-pay/api-reference/sandbox-simulation-environment/simulate-acceptance-of-a-payment-request#request-body-parameters
