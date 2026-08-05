@@ -24,7 +24,6 @@ const API_ENDPOINTS = {
     MIA_QR_EXTENSION_CANCEL: 'mia/qr/:qrId/extension/cancel',
     MIA_PAYMENTS: 'mia/payments',
     MIA_PAYMENTS_ID: 'mia/payments/:payId',
-    MIA_PAYMENTS_REFUND: 'mia/payments/:payId/refund',
     MIA_TEST_PAY: 'mia/test-pay',
 
     // maib RTP API endpoints
